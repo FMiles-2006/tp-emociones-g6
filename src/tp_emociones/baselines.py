@@ -38,6 +38,17 @@ def metricas(y_true, y_pred) -> dict[str, float]:
     return {"accuracy": accuracy_score(y_true, y_pred), "f1_macro": f1_score(y_true, y_pred, average="macro")}
 
 
+def _a_enteros(y_tr, y_ev) -> tuple[np.ndarray, np.ndarray]:
+    """Etiquetas de texto -> enteros con un vocabulario común a train y evaluación.
+
+    Motivo: scikit-learn 1.6 (la versión de Colab) falla en MLPClassifier con
+    early_stopping=True si las etiquetas son strings. Con enteros funciona en todas.
+    """
+    clases = np.unique(np.concatenate([np.asarray(y_tr), np.asarray(y_ev)]))
+    indice = {c: i for i, c in enumerate(clases)}
+    return np.array([indice[v] for v in y_tr]), np.array([indice[v] for v in y_ev])
+
+
 def modelos_baseline(seed: int = config.SEED) -> dict[str, object]:
     return {
         "Trivial (clase más frecuente)": DummyClassifier(strategy="most_frequent"),
@@ -50,6 +61,7 @@ def modelos_baseline(seed: int = config.SEED) -> dict[str, object]:
 
 def evaluar_baselines(X_tr, y_tr, X_ev, y_ev, seed: int = config.SEED) -> pd.DataFrame:
     """Entrena cada baseline en train y lo mide en el conjunto de evaluación dado."""
+    y_tr, y_ev = _a_enteros(y_tr, y_ev)
     filas = []
     for nombre, modelo in modelos_baseline(seed).items():
         t0 = time.perf_counter()
@@ -65,6 +77,7 @@ def evaluar_baselines(X_tr, y_tr, X_ev, y_ev, seed: int = config.SEED) -> pd.Dat
 def medir_costo_mlp(X_tr, y_tr, X_ev, y_ev, arquitecturas=((64,), (256,), (512, 256), (1024, 512)),
                     max_iter: int = 15, seed: int = config.SEED) -> pd.DataFrame:
     """Medición 1: parámetros vs tiempo vs accuracy al agrandar el MLP de sklearn."""
+    y_tr, y_ev = _a_enteros(y_tr, y_ev)
     filas = []
     for arq in arquitecturas:
         m = MLPClassifier(hidden_layer_sizes=arq, max_iter=max_iter, random_state=seed)
@@ -85,6 +98,7 @@ def permutacion_fija(n_features: int, seed: int = config.SEED) -> np.ndarray:
 def experimento_permutacion_mlp(X_tr, y_tr, X_ev, y_ev, seed: int = config.SEED) -> dict[str, float]:
     """Medición 2: el MLP rinde igual con los píxeles mezclados -> no usa la estructura
     espacial. (La misma prueba sobre la CNN está en interpretacion.py.)"""
+    y_tr, y_ev = _a_enteros(y_tr, y_ev)
     perm = permutacion_fija(X_tr.shape[1], seed)
     res = {}
     for nombre, (a, b) in {"original": (X_tr, X_ev), "permutada": (X_tr[:, perm], X_ev[:, perm])}.items():
