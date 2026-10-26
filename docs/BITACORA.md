@@ -64,7 +64,48 @@ quién y cuándo. Las decisiones no se borran: si cambian, se agrega una entrada
   emoción 0,314 → 0,297. Mezclar los píxeles no cambia el resultado: el MLP no usa la
   estructura espacial. Motiva las CNN (D-006).
 
+## D-006 · Pipeline tf.data y aumentación como capas del modelo — 2026-10-26
+- **Qué:** patrón del curso `map → cache → shuffle (solo train) → batch → prefetch`, con las
+  imágenes cacheadas en uint8 (~400 MB). Escalado y aumentación van **dentro del modelo**.
+- **Por qué:** cachear en float32 cuadruplica la RAM sin beneficio; con el preprocesamiento
+  adentro, el modelo guardado no puede ser alimentado distinto en inferencia (clase 17).
+- **Aumentación elegida (válida para rostros):** flip horizontal, rotación ±8°, zoom ±10 %,
+  traslación ±5 %, brillo y contraste ±15 %.
+- **Descartado:** flip vertical (caras imposibles), rotaciones grandes y recortes agresivos
+  (tapan cejas/boca, que es la señal de la emoción).
+- **Desbalance:** pesos por clase "balanced" en la pérdida + F1 macro como métrica.
+
+## D-007 · CNN propia desde cero (experimento de control) — 2026-10-26
+- **Arquitectura:** 4 bloques [Conv3×3 → Conv3×3 → BatchNorm → MaxPool] con filtros
+  32/64/128/256, GlobalAveragePooling, Dense(128), Dropout(0,5), softmax. L2 = 1e-4.
+  ~1,2 M parámetros. Adam 1e-3, hasta 60 épocas, EarlyStopping(val_loss, paciencia 8,
+  restaura mejores pesos) + ReduceLROnPlateau.
+- **Por qué GAP y no Flatten:** con 224×224, Flatten daría ~50.000 entradas a la densa
+  (millones de parámetros para ~1.900 imágenes).
+- **Experimento de permutación (NB11):** misma CNN con píxeles permutados; si su desempeño
+  se desploma, prueba que usa la estructura espacial (al revés que el MLP, D-005).
+- **Resultados:** pendientes de la corrida con GPU.
+
+## D-008 · ResNet50 con transferencia en dos fases — 2026-10-26
+- **Fase 1:** base de ImageNet congelada (`training=False`), cabeza GAP → Dropout(0,3) →
+  softmax. Adam 1e-3, hasta 20 épocas. Entrenables: 40.980 (identidad) / 10.245 (emoción).
+- **Fase 2:** se descongela el bloque conv5 (BatchNorm sigue congelada), se recompila con
+  Adam 1e-5 (100× menor), hasta 20 épocas. Entrenables: ~15,0 M de 23,6 M.
+- **Por qué este orden (NB15):** la cabeza aleatoria genera gradientes grandes que, con la
+  base libre, destruyen lo aprendido en ImageNet.
+- **Preprocesamiento:** `resnet50.preprocess_input` como capa dentro del modelo (NB13).
+- **Resultados:** pendientes de la corrida con GPU.
+
+## D-009 · Prueba de humo en Colab (CPU) — 2026-10-26
+- El notebook completo corrió de punta a punta en Colab (TF 2.21, Keras 3.13,
+  scikit-learn 1.6.1) sobre un subconjunto de 360 imágenes y 1 época por fase: sin errores.
+  Huella del dataset en Colab = local (`512b8d7c66ec`): la carga es reproducible.
+- **Bug encontrado y corregido:** scikit-learn 1.6 falla en `MLPClassifier(early_stopping=True)`
+  con etiquetas de texto → los baselines usan etiquetas enteras.
+- **Limitación operativa:** sin GPU, ResNet50 tarda ~15 s por lote en CPU (~13 min por
+  época con el train completo). La corrida final exige GPU T4.
+
 ## Pendientes
-- D-006 CNN propia (arquitectura, aumentación) — a cargo de: _completar_
-- D-007 ResNet50 con transferencia en 2 fases — a cargo de: _completar_
-- D-008 Evaluación final en test (una sola vez) + oclusión
+- Corrida completa con GPU y completar resultados de D-007 / D-008.
+- D-010 Evaluación final en test (una sola vez) + oclusión + conclusiones.
+- Avisar al responsable del Drive sobre Pachu Peña (ñ) y Rodrigo de la Serna.
