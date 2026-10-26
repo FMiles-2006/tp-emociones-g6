@@ -1,0 +1,15 @@
+# Nunca se versionan imágenes ni datos del curso (uso responsable: no se publica el dataset)
+data/
+*.jpg
+*.jpeg
+*.png
+!docs/figuras/*.png
+*.zip
+# Artefactos de entrenamiento
+*.keras
+*.h5
+logs/
+resultados/
+__pycache__/
+*.egg-info/
+.ipynb_checkpoints/
