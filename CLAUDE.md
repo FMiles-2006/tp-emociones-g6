@@ -24,8 +24,9 @@ alegria, enojo, neutral, sorpresa, tristeza). Todo corre en Google Colab.
 
 ## Estructura
 - `notebooks/TP2_Grupo6.ipynb` — **todo el código de la entrega**, autocontenido, en secciones:
-  entorno → datos → partición → baselines → acta de límites → pipeline + alineación de rostros →
-  CNN propia (v1 control, v2 multitarea) → ResNet50 → test → oclusión → conclusiones. Cada función se define una sola vez, en la
+  entorno → datos → partición → baselines → acta de límites → pipeline →
+  CNN propia (v1 control, v3 final con KerasTuner) → ResNet50 → test → oclusión → conclusiones →
+  Anexo A plegado (versiones anteriores, fuera del programa). Cada función se define una sola vez, en la
   sección donde se usa por primera vez.
 - `docs/BITACORA.md` — registro de decisiones.
 - `docs/EXPERIMENTOS_CNN.md` — toda configuración de la CNN que se prueba, con resultado en validación.
@@ -41,5 +42,13 @@ alegria, enojo, neutral, sorpresa, tristeza). Todo corre en Google Colab.
 - Antes de guardar en GitHub: "Ejecutar todas" con GPU T4 y verificar que corre de punta a punta.
 - Cuando trabajes con Claude Code: un cambio lógico por commit, mensaje en español.
 - La competencia del curso es con la **CNN propia desde cero** (sin pesos preentrenados) sobre fotos
-  cualquiera: toda mejora a la CNN tiene que pasar por `preparar_cara` (detección + alineación).
-  El código para subir imágenes y predecir se agrega al final (pedido del grupo); no adelantarlo.
+  cualquiera. El código para subir imágenes y predecir se agrega al final (pedido del grupo); no adelantarlo.
+- **Solo técnicas vistas en la cátedra** en el flujo principal (programa en EVA/AULA.html y notebooks
+  NB03–NB16 + clase 17). Lo que no se vio (mixup, label smoothing, AdamW, tasas variables,
+  ReduceLROnPlateau, borrado/gris aleatorio, conjuntos de redes, TTA, detector de rostros) va al
+  **Anexo A** del notebook, plegado, como registro. Ante la duda, preguntar al grupo antes de usarla.
+- **Nunca se borran versiones anteriores de la CNN**: se mueven al anexo (plegado en Colab) con sus
+  números, y cada experimento queda en `docs/EXPERIMENTOS_CNN.md`.
+- Después de cada corrida se informa al grupo el resultado de **cada modelo en las dos tareas**
+  (identidad y emoción, accuracy y F1 macro) y se guarda la versión en GitHub desde Colab
+  **sin resultados de celdas** (el repo es público y las salidas tendrían caras del dataset).

@@ -216,6 +216,20 @@ rayas. Con el recorte original la identidad es la mejor en todas las comparacion
 entre videos del mismo canal, que no se repiten en fotos nuevas.
 **Quién:** Francisco Miles (con Claude).
 
+## D-015 · La CNN final usa solo técnicas vistas en la cátedra (v3) — 2026-10-27
+**Qué:** la CNN que se entrega y compite (v3) usa solo herramientas del programa: bloques
+residuales con `Add` (NB13), dos salidas con la API Functional (clase 10), capas de aumentación
+(NB03/NB16, clase 17), Dropout + L2 + EarlyStopping (NB07), pesos por clase (NB08), Adam (NB06) y
+**búsqueda de hiperparámetros con KerasTuner** (NB09). También se quita ReduceLROnPlateau de la v1 y
+de ResNet50. Lo que no se vio (D-013/D-014: alineación de rostros con YuNet, mixup, label smoothing,
+AdamW, tasa coseno, borrado/gris aleatorio, TTA, conjunto de redes) pasa al **Anexo A** del
+notebook, plegado, con su código y sus números (E2–E13), sin borrar nada.
+**Por qué:** pedido del grupo: cada decisión tiene que poder defenderse con el material del curso,
+aunque una técnica externa rinda más (E12: 0,360 / 0,418 en val con mixup).
+**Alternativas descartadas:** usar mixup y justificarlo en el informe (descartado por el grupo).
+**Reemplaza:** D-013 y D-014 en lo que respecta a la CNN final (quedan como historia del anexo).
+**Quién:** Francisco Miles (con Claude).
+
 ## Pendientes
 - Avisar al responsable del Drive sobre Pachu Peña (ñ) y Rodrigo de la Serna.
 - (Opcional) Repetir con 3 semillas para reportar media ± desvío.

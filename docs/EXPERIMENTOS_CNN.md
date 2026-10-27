@@ -1,5 +1,10 @@
 # Experimentos con la CNN propia (insumo del informe)
 
+> **Aviso (2026-10-27, decisión del grupo, D-015):** E2–E13 usan técnicas que **no se vieron en la
+> cátedra** (detector y alineación de rostros, mixup, label smoothing, AdamW con tasa coseno, borrado
+> y gris aleatorio, TTA, conjunto de redes). Quedan como registro en el **Anexo A** del notebook; la
+> CNN que se entrega y compite es la **v3**, solo con técnicas del programa (E14 en adelante).
+
 Registro de **todas** las configuraciones de la CNN desde cero que se probaron, incluidas las que
 empeoraron. Todas se miden en **validación** (428 imágenes, videos que no están en train); el test
 no se usa para elegir. Métricas: accuracy y F1 macro, con TTA (imagen + espejo) desde E2.
@@ -28,6 +33,7 @@ actor y emoción de fotos nuevas. Sin pesos preentrenados.
 | E10 | Búsqueda 2 (120 ép.): recorte original + zoom 0,2 / traslación 0,1 | 0,334 / 0,291 | 0,320 / 0,297 | 0,984 | No mejora: más aumentación geométrica no frena la memorización |
 | E11 | Búsqueda 2 (120 ép.): recorte original a 64×64 | 0,343 / 0,319 | 0,299 / 0,288 | 0,986 | Identidad igual, emoción peor (se pierde detalle de boca y ojos); 40 % más rápida |
 | E12 | Búsqueda 3: recorte original + mixup 0,2, **200 épocas** | **0,360 / 0,344** | **0,418 / 0,400** | 0,969 | Mejor de todas: emoción casi en el techo humano (42,6 %) |
+| E13 | Búsqueda 3: conjunto de 3 redes (mixup, 120 ép. c/u) | 0,350 / 0,311 | 0,388 / 0,368 | ~0,96 | No mejora a una sola red (0,348 / 0,407): no vale el costo ×3 |
 
 ## Detalle
 
@@ -106,3 +112,18 @@ Referencia: E3 (recorte original sin mixup) = identidad 0,357 / 0,311, emoción 
   la época 120 (la mezcla de imágenes hace que memorizar cueste más), y la tasa coseno más larga
   pasa más tiempo con tasas bajas, donde se refina. La emoción queda prácticamente en el acuerdo
   entre etiquetadores medido en el TP1 (42,6 %). Identidad ya supera al Random Forest (0,334 / 0,277).
+- **E13 · conjunto de 3 redes** (mixup, 120 épocas cada una, semillas 1–3): una sola red da 0,348 / 0,307
+  y 0,407 / 0,384; promediar las tres da 0,350 / 0,311 y 0,388 / 0,368. **No mejora** (emoción baja):
+  las tres redes se equivocan en las mismas imágenes (los mismos videos difíciles), así que promediar
+  no corrige. Triplica el costo sin beneficio.
+
+### Revisión del programa de la cátedra (2026-10-27)
+Se revisó el programa (EVA, AULA.html) y los notebooks de práctica NB03–NB16 + clase 17:
+- **Vistos:** capas de aumentación (flip, rotación, zoom; brillo en el TP de aumentación; clase 17:
+  cada transformación declara una invarianza), Dropout, L1/L2, EarlyStopping (NB07), `class_weight`
+  (NB08), KerasTuner (NB09), conexiones residuales con `layers.Add` (NB13), API Functional con varias
+  salidas (clase 10), transferencia y ajuste fino (NB14–NB15), oclusión (NB12), SGD/Adam (NB06).
+- **No vistos:** mixup, label smoothing, AdamW, tasas de aprendizaje variables (coseno, warmup,
+  ReduceLROnPlateau), borrado/gris aleatorio, conjuntos de redes, TTA, detectores de rostro.
+
+Decisión del grupo: la CNN final usa **solo lo visto** (v3). Ver E14 en adelante.
