@@ -25,6 +25,8 @@ actor y emoción de fotos nuevas. Sin pesos preentrenados.
 | E7 | Búsqueda (80 ép.): alineado 0,55 + mixup 0,2 | 0,215 / 0,185 | 0,222 / 0,202 | 0,916 | Peor: el margen extra sale de bordes replicados |
 | E8 | Búsqueda (80 ép.): sin alinear + mixup 0,2 | **0,311 / 0,286** | 0,271 / 0,231 | 0,927 | Mejor identidad de la búsqueda: confirma el recorte original |
 | E9 | Búsqueda 2 (120 ép.): recorte original + mixup 0,2 | 0,334 / 0,309 | **0,343 / 0,324** | 0,957 | Identidad igual a E3 (F1), emoción +4 puntos: mejor equilibrio |
+| E10 | Búsqueda 2 (120 ép.): recorte original + zoom 0,2 / traslación 0,1 | 0,334 / 0,291 | 0,320 / 0,297 | 0,984 | No mejora: más aumentación geométrica no frena la memorización |
+| E11 | Búsqueda 2 (120 ép.): recorte original a 64×64 | 0,343 / **0,319** | 0,299 / 0,288 | 0,986 | Identidad igual, emoción peor (se pierde detalle de boca y ojos); 40 % más rápida |
 
 ## Detalle
 
@@ -88,3 +90,11 @@ Referencia: E3 (recorte original sin mixup) = identidad 0,357 / 0,311, emoción 
 - **E9 · + mixup 0,2:** identidad 0,334 / 0,309 (igual en F1), emoción **0,343 / 0,324** (+4 puntos
   de accuracy, +0,042 de F1). Train actor 95,7 % (vs 98,8 %): mixup sí frena la memorización
   cuando el entrenamiento es largo. 678 s.
+- **E10 · + aumentación de encuadre (zoom ±20 %, traslación ±10 %):** 0,334 / 0,291 y 0,320 / 0,297.
+  Train actor 98,4 %: mover el encuadre no frena la memorización; no mejora.
+- **E11 · entrada 64×64:** 0,343 / 0,319 y 0,299 / 0,288. Identidad dentro del ruido de E3/E9,
+  emoción peor: a 64 px se pierde el detalle de boca y cejas. 416 s (40 % más rápida).
+
+**Decisión de la búsqueda 2:** la receta base pasa a ser **recorte original 112×112 + mixup 0,2**
+(E9): es la única que mejora una tarea sin empeorar la otra (suma de F1 macro 0,633 contra
+0,593 de E3, 0,588 de E10 y 0,607 de E11).
