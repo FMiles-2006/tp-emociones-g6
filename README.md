@@ -19,15 +19,12 @@ Duración aproximada con GPU T4: 30–40 minutos.
 ## Qué hay en el repo
 | Ruta | Contenido |
 |---|---|
-| `notebooks/TP2_Grupo6.ipynb` | Notebook de la entrega, de punta a punta |
-| `src/tp_emociones/` | Toda la lógica (datos, partición, baselines, pipeline, modelos, evaluación) |
+| `notebooks/TP2_Grupo6.ipynb` | Notebook de la entrega con **todo el código**, de punta a punta |
 | `docs/BITACORA.md` | Registro de **todas** las decisiones con su porqué |
 | `CLAUDE.md` | Reglas del proyecto (las lee Claude Code de cada integrante) |
-| `tests/` | Tests de la partición sin fugas (`python -m pytest tests/`) |
-| `scripts/construir_metadata_video.py` | Cómo se recuperó el video de origen de cada imagen |
 
 ## Cómo trabajar en grupo
-- Cambios a modelos/hiperparámetros: en `src/tp_emociones/` (no copiar código en notebooks).
+- El código se edita en Colab y se guarda acá con "Archivo → Guardar una copia en GitHub".
 - Toda decisión nueva: una entrada en `docs/BITACORA.md`.
-- Un cambio lógico por commit; antes de subir, correr los tests.
+- Un cambio lógico por commit; antes de guardar, "Ejecutar todas" con GPU.
 - Nunca se suben imágenes, zips ni modelos entrenados (ver `.gitignore`).

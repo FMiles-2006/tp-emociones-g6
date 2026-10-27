@@ -105,6 +105,18 @@ quién y cuándo. Las decisiones no se borran: si cambian, se agrega una entrada
 - **Limitación operativa:** sin GPU, ResNet50 tarda ~15 s por lote en CPU (~13 min por
   época con el train completo). La corrida final exige GPU T4.
 
+## D-010 · El código vive en el notebook de Colab; GitHub solo versiona — 2026-10-27
+- **Qué:** el notebook `notebooks/TP2_Grupo6.ipynb` es autocontenido: todas las funciones
+  están escritas en sus celdas, cada una en la sección donde se usa (definidas una sola vez).
+  Se eliminó el paquete `src/tp_emociones` (queda en el historial de git).
+- **Por qué:** la entrega se presenta y se defiende en Colab; un notebook que clona código
+  externo no se puede leer ni defender celda por celda. GitHub se usa como control de
+  versiones (volver atrás, ver qué cambió y quién).
+- **Cambio respecto de D-003:** el video de origen ya no sale de un CSV versionado en el
+  repo, sino que el notebook lo lee directamente (en solo lectura) de los registros de cada
+  grupo en el Drive del curso.
+- **Reemplaza:** la regla "la lógica vive en el paquete" del CLAUDE.md original.
+
 ## Pendientes
 - Corrida completa con GPU y completar resultados de D-007 / D-008.
 - D-010 Evaluación final en test (una sola vez) + oclusión + conclusiones.

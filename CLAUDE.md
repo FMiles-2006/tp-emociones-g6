@@ -8,14 +8,14 @@ alegria, enojo, neutral, sorpresa, tristeza). Todo corre en Google Colab.
 1. **El Drive del curso es de solo lectura.** Ningún código escribe, mueve ni borra nada en
    `CARPETA COMPARTIDA PARA TODOS`. El notebook copia DATASET_FINAL a `/content/datos`
    y trabaja sobre la copia. Si una tarea parece requerir escribir ahí: parar y preguntar.
-2. **Partición por video, nunca por imagen.** Se usa `particion.particionar` y después
-   `particion.verificar_sin_fugas`. No crear particiones "a mano" en ningún notebook.
+2. **Partición por video, nunca por imagen.** Se usa `particionar` y después
+   `verificar_sin_fugas` (sección 3 del notebook). No crear particiones "a mano" en ningún notebook.
 3. **El test se evalúa una sola vez por entrega**, al final. Toda decisión (épocas, lr,
    capas a descongelar, aumentación) se toma contra validación.
-4. **Reproducibilidad:** `config.fijar_semillas()` al inicio de cada notebook y antes de
-   construir cada modelo. Toda constante que afecte resultados vive en `config.py`.
-5. **Sin código duplicado:** si algo se usa en dos notebooks, va a `src/tp_emociones/`.
-   Los notebooks orquestan y explican; la lógica vive en el paquete.
+4. **Reproducibilidad:** `fijar_semillas()` al inicio y antes de construir cada modelo.
+   Toda constante que afecte resultados vive en la celda 1.1 del notebook.
+5. **Sin código duplicado:** cada función se define una sola vez en el notebook y se reutiliza
+   para las dos tareas (identidad y emoción).
 6. **Toda decisión se registra** en `docs/BITACORA.md` (formato D-NNN: qué, por qué,
    alternativas descartadas, quién, fecha). Si cambiás una decisión, agregá una entrada
    nueva que referencie la vieja; no borres historia.
@@ -23,22 +23,18 @@ alegria, enojo, neutral, sorpresa, tristeza). Todo corre en Google Colab.
    publica fuera del curso.
 
 ## Estructura
-- `src/tp_emociones/config.py` — semilla, clases, tamaños, fracciones.
-- `src/tp_emociones/datos.py` — lectura del CSV del curso, normalización de nombres,
-  recuperación del video de origen, huella (versión) del dataset.
-- `src/tp_emociones/particion.py` — partición train/val/test por video + verificación.
-- `src/tp_emociones/baselines.py` — trivial, RF y MLP sobre píxeles; acta de límites (NB02).
-- `src/tp_emociones/pipeline.py` — tf.data (patrón del curso) + aumentación para rostros.
-- `src/tp_emociones/modelos.py` — CNN propia y ResNet50 (transferencia en 2 fases).
-- `src/tp_emociones/evaluacion.py` — métricas, matriz de confusión, errores, oclusión.
-- `src/tp_emociones/recursos/video_por_imagen.csv` — generado por
-  `scripts/construir_metadata_video.py` desde los registros de cada grupo.
-- `notebooks/` — un notebook por bloque de la entrega; importan el paquete.
+- `notebooks/TP2_Grupo6.ipynb` — **todo el código de la entrega**, autocontenido, en secciones:
+  entorno → datos → partición → baselines → acta de límites → pipeline → CNN propia →
+  ResNet50 → test → oclusión → conclusiones. Cada función se define una sola vez, en la
+  sección donde se usa por primera vez.
+- `docs/BITACORA.md` — registro de decisiones.
+- GitHub es control de versiones: el notebook se edita en Colab y se guarda en el repo con
+  "Archivo → Guardar una copia en GitHub".
 
 ## Convenciones
 - Código y comentarios en español. Funciones con docstring que explique el *por qué*.
-- Cada modelo nuevo: función constructora en `modelos.py` que llame a `fijar_semillas`.
+- Cada modelo nuevo: función constructora en el notebook que llame a `fijar_semillas`.
 - Métricas que se reportan siempre: accuracy y **F1 macro** (las clases están desbalanceadas)
   + matriz de confusión. Para emoción, recordar el techo de acuerdo entre etiquetadores.
-- Antes de commitear: correr `python -m pytest tests/` (tests de datos y partición).
+- Antes de guardar en GitHub: "Ejecutar todas" con GPU T4 y verificar que corre de punta a punta.
 - Cuando trabajes con Claude Code: un cambio lógico por commit, mensaje en español.
