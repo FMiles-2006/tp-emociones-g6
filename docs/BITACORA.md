@@ -117,6 +117,36 @@ quién y cuándo. Las decisiones no se borran: si cambian, se agrega una entrada
   grupo en el Drive del curso.
 - **Reemplaza:** la regla "la lógica vive en el paquete" del CLAUDE.md original.
 
+## D-011 · Primera corrida con GPU: baselines, acta y una falla de la CNN corregida — 2026-10-27
+Corrida en Colab con GPU T4 (TF 2.21 · Keras 3.13 · scikit-learn 1.6.1), huella `512b8d7c66ec`,
+partición: train 1.869 / val 428 / test 426. Todos los números de esta entrada son de **validación**.
+
+**Baselines (D-005, recalculados en Colab):**
+
+| Tarea | Trivial acc / F1m | RF acc / F1m | MLP acc / F1m |
+|---|---|---|---|
+| Identidad | 0,147 / 0,013 | **0,334 / 0,277** | 0,280 / 0,218 |
+| Emoción | 0,238 / 0,077 | 0,255 / 0,167 | **0,276 / 0,252** |
+
+**Acta de límites:** MLP de 263 mil a 4,7 M parámetros → 19× más tiempo (1,0 s → 19,4 s) y
+la misma accuracy (27,8 %). Permutación de píxeles: identidad 28,0 % → 29,2 %; emoción
+27,6 % → 26,6 %. El MLP no usa la estructura espacial.
+
+**Falla de la CNN propia (intento 1) — qué no funcionó:** identidad con 75 % en train y
+**4,4 %** en validación (peor que el trivial); val_loss subiendo desde la época 1.
+- Diagnóstico: BatchNormalization con momentum 0,99 → los promedios móviles que usa en
+  inferencia tardan muchas épocas en estabilizarse (59 pasos por época); el early stopping
+  (paciencia 8) cortó en la época 9 y restauró los pesos de la época 1.
+- Se interrumpió la corrida **antes de la sección 9**: el test no se usó.
+- Corrección (decidida contra validación): `BatchNormalization(momentum=0.9)` y
+  `EarlyStopping(start_from_epoch=10, patience=10)` para la CNN (ResNet50 sin cambios).
+
+**CNN propia (intento 2), identidad:** val accuracy 0,192 · F1 macro 0,175 (1,21 M
+parámetros, 25 épocas). Train llega a ~89 %: sobreajuste fuerte. Con ~90 imágenes por actor
+de 2 a 10 videos, la red desde cero aprende rasgos de cada video que no se repiten en
+validación. **No supera al Random Forest** — resultado esperado del experimento de control
+(NB14) y argumento a favor de la transferencia.
+
 ## Pendientes
 - Corrida completa con GPU y completar resultados de D-007 / D-008.
 - D-010 Evaluación final en test (una sola vez) + oclusión + conclusiones.
