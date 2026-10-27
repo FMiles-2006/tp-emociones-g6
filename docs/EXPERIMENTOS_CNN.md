@@ -26,7 +26,8 @@ actor y emoción de fotos nuevas. Sin pesos preentrenados.
 | E8 | Búsqueda (80 ép.): sin alinear + mixup 0,2 | **0,311 / 0,286** | 0,271 / 0,231 | 0,927 | Mejor identidad de la búsqueda: confirma el recorte original |
 | E9 | Búsqueda 2 (120 ép.): recorte original + mixup 0,2 | 0,334 / 0,309 | **0,343 / 0,324** | 0,957 | Identidad igual a E3 (F1), emoción +4 puntos: mejor equilibrio |
 | E10 | Búsqueda 2 (120 ép.): recorte original + zoom 0,2 / traslación 0,1 | 0,334 / 0,291 | 0,320 / 0,297 | 0,984 | No mejora: más aumentación geométrica no frena la memorización |
-| E11 | Búsqueda 2 (120 ép.): recorte original a 64×64 | 0,343 / **0,319** | 0,299 / 0,288 | 0,986 | Identidad igual, emoción peor (se pierde detalle de boca y ojos); 40 % más rápida |
+| E11 | Búsqueda 2 (120 ép.): recorte original a 64×64 | 0,343 / 0,319 | 0,299 / 0,288 | 0,986 | Identidad igual, emoción peor (se pierde detalle de boca y ojos); 40 % más rápida |
+| E12 | Búsqueda 3: recorte original + mixup 0,2, **200 épocas** | **0,360 / 0,344** | **0,418 / 0,400** | 0,969 | Mejor de todas: emoción casi en el techo humano (42,6 %) |
 
 ## Detalle
 
@@ -98,3 +99,10 @@ Referencia: E3 (recorte original sin mixup) = identidad 0,357 / 0,311, emoción 
 **Decisión de la búsqueda 2:** la receta base pasa a ser **recorte original 112×112 + mixup 0,2**
 (E9): es la única que mejora una tarea sin empeorar la otra (suma de F1 macro 0,633 contra
 0,593 de E3, 0,588 de E10 y 0,607 de E11).
+
+### E12–E13 · Búsqueda 3: entrenar más largo y conjunto de redes (2026-10-27)
+- **E12 · E9 con 200 épocas:** identidad **0,360 / 0,344**, emoción **0,418 / 0,400**. Train actor 96,9 %.
+  1.126 s. Mejor resultado de todas las búsquedas: con mixup la red sigue aprendiendo después de
+  la época 120 (la mezcla de imágenes hace que memorizar cueste más), y la tasa coseno más larga
+  pasa más tiempo con tasas bajas, donde se refina. La emoción queda prácticamente en el acuerdo
+  entre etiquetadores medido en el TP1 (42,6 %). Identidad ya supera al Random Forest (0,334 / 0,277).
