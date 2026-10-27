@@ -19,6 +19,11 @@ actor y emoción de fotos nuevas. Sin pesos preentrenados.
 | E1 | v1: 4 bloques Conv-Conv-BN-Pool, 224×224, una red por tarea | 0,192 / 0,175 | 0,255 / 0,247 | ~0,89 | Memoriza el video; peor que el RF |
 | E2 | v2: residual multitarea, rostro alineado (escala 0,85), 112×112, 120 ép. | 0,292 / 0,257 | **0,334 / 0,305** | 0,986 | Mejora mucho a la v1; sigue sobreajustando |
 | E3 | E2 pero sin alinear (recorte del curso reducido a 112×112) | **0,357 / 0,311** | 0,304 / 0,282 | 0,988 | Alinear ajustado ayuda emoción y perjudica identidad |
+| E4 | Búsqueda (80 ép.): alineado 0,85 | 0,243 / 0,223 | 0,299 / 0,261 | 0,964 | Referencia de la búsqueda: con 80 épocas rinde menos que con 120 |
+| E5 | Búsqueda (80 ép.): alineado 0,65 (más contexto) | 0,250 / 0,223 | 0,266 / 0,226 | 0,963 | Más margen no ayuda |
+| E6 | Búsqueda (80 ép.): alineado 0,65 + mixup 0,2 | 0,238 / 0,221 | 0,255 / 0,210 | 0,915 | Mixup baja el sobreajuste pero no mejora validación |
+| E7 | Búsqueda (80 ép.): alineado 0,55 + mixup 0,2 | 0,215 / 0,185 | 0,222 / 0,202 | 0,916 | Peor: el margen extra sale de bordes replicados |
+| E8 | Búsqueda (80 ép.): sin alinear + mixup 0,2 | **0,311 / 0,286** | 0,271 / 0,231 | 0,927 | Mejor identidad de la búsqueda: confirma el recorte original |
 
 ## Detalle
 
@@ -54,3 +59,25 @@ Misma red y receta con el recorte original del curso reducido a 112×112.
   ventaja del recorte original puede venir de fondos parecidos entre videos del mismo canal,
   que no se repiten en fotos nuevas.
 - Próximo paso: alineación con más margen (escala 0,65 / 0,55) y mixup contra el sobreajuste.
+
+### E4–E8 · Búsqueda 1: margen de la alineación y mixup (2026-10-27)
+Hipótesis después de E3: la alineación ajustada (0,85) pierde pelo y contorno de la cabeza.
+Se probó alinear con más margen (0,65 y 0,55) y **mixup** (mezclar pares de imágenes y de
+etiquetas con proporción ~Beta(0,2; 0,2)), un regularizador fuerte contra el sobreajuste.
+Todas con 80 épocas (para que cada prueba tarde ~8 min) y la misma semilla.
+
+Resultados y lectura:
+- **Más margen empeora** (0,85 → 0,65 → 0,55: identidad 0,243 → 0,250 → 0,215). Causa: los
+  recortes del curso **ya son recortes** (la cara ocupa ~53 % del lado). Alinear con más margen
+  pide píxeles fuera de la imagen y OpenCV los rellena repitiendo el borde: rayas artificiales.
+- **Mixup** baja el accuracy de train (96 % → 92 %) pero no mejora validación con 80 épocas.
+- **El recorte original del curso gana en identidad** también con mixup (0,311 vs 0,238).
+- 80 épocas rinden menos que 120 (E2: 0,292 vs E4: 0,243): la tasa coseno necesita el recorrido largo.
+- Ruido de la medición: con 428 imágenes de validación, el error estándar de un accuracy ~0,3 es
+  ±2,2 puntos; diferencias menores a ~4 puntos entre corridas únicas no son concluyentes.
+
+Decisión: la CNN se entrena con el **recorte original del curso** (112×112). Para las fotos nuevas
+de la competencia se reproduce ese encuadre: en los recortes del curso la cara (caja del detector)
+mide en mediana **52,7 % del lado** (p10 37,9 %, p90 70,0 %) y está centrada (centro x 0,50,
+centro y 0,50). Una foto nueva se recorta con un cuadrado centrado en la cara de lado
+ancho_cara / 0,527. La alineación ajustada se reserva como opción para emoción.
