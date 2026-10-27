@@ -25,9 +25,11 @@ alegria, enojo, neutral, sorpresa, tristeza). Todo corre en Google Colab.
 ## Estructura
 - `notebooks/TP2_Grupo6.ipynb` — **todo el código de la entrega**, autocontenido, en secciones:
   entorno → datos → partición → baselines → acta de límites → pipeline + alineación de rostros →
-  CNN propia (v1 control, v2 multitarea) → ResNet50 → test → oclusión → conclusiones → competencia. Cada función se define una sola vez, en la
+  CNN propia (v1 control, v2 multitarea) → ResNet50 → test → oclusión → conclusiones. Cada función se define una sola vez, en la
   sección donde se usa por primera vez.
 - `docs/BITACORA.md` — registro de decisiones.
+- `docs/EXPERIMENTOS_CNN.md` — toda configuración de la CNN que se prueba, con resultado en validación.
+  Se agrega una fila por experimento (también los que empeoran): es la base del informe.
 - GitHub es control de versiones: el notebook se edita en Colab y se guarda en el repo con
   "Archivo → Guardar una copia en GitHub".
 
@@ -40,3 +42,4 @@ alegria, enojo, neutral, sorpresa, tristeza). Todo corre en Google Colab.
 - Cuando trabajes con Claude Code: un cambio lógico por commit, mensaje en español.
 - La competencia del curso es con la **CNN propia desde cero** (sin pesos preentrenados) sobre fotos
   cualquiera: toda mejora a la CNN tiene que pasar por `preparar_cara` (detección + alineación).
+  El código para subir imágenes y predecir se agrega al final (pedido del grupo); no adelantarlo.

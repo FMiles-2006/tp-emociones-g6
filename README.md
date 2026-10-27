@@ -14,19 +14,14 @@ Martín Masuelli · Francisco Miles · Tomás Lizazu · Bautista Verna · Juan D
 4. **Entorno de ejecución → Ejecutar todas** y aceptá el permiso de Drive. El Drive se monta
    en **solo lectura**: el notebook no puede modificar nada del curso.
 
-Duración aproximada con GPU T4: 70–90 minutos (incluye entrenar la CNN de la competencia con todas las imágenes).
-
-## Competencia (predecir actor y emoción de fotos nuevas)
-Al final del notebook (sección 12) queda entrenada la **CNN propia v2** con todas las imágenes.
-En una celda nueva: `display(competir())` → se suben una o varias fotos (cualquier foto: el notebook
-detecta y alinea la cara) y muestra actor y emoción con el top-3 de probabilidades.
-El modelo queda en `/content/modelos/cnn_g6_competencia.keras` para descargarlo y no reentrenar.
+Duración aproximada con GPU T4: 60–70 minutos.
 
 ## Qué hay en el repo
 | Ruta | Contenido |
 |---|---|
 | `notebooks/TP2_Grupo6.ipynb` | Notebook de la entrega con **todo el código**, de punta a punta |
 | `docs/BITACORA.md` | Registro de **todas** las decisiones con su porqué |
+| `docs/EXPERIMENTOS_CNN.md` | Cada configuración de la CNN propia que se probó y su resultado (insumo del informe) |
 | `CLAUDE.md` | Reglas del proyecto (las lee Claude Code de cada integrante) |
 
 ## Cómo trabajar en grupo
