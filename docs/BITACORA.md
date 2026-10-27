@@ -147,7 +147,48 @@ de 2 a 10 videos, la red desde cero aprende rasgos de cada video que no se repit
 validación. **No supera al Random Forest** — resultado esperado del experimento de control
 (NB14) y argumento a favor de la transferencia.
 
+## D-012 · Comparación final, evaluación única en test y conclusiones — 2026-10-27
+Misma corrida T4 que D-011 (huella `512b8d7c66ec`). Completa los resultados de D-007 y D-008.
+
+**Validación (acc / F1 macro):**
+
+| Modelo | Identidad | Emoción |
+|---|---|---|
+| CNN propia | 0,192 / 0,175 | 0,255 / 0,247 |
+| ResNet50 fase 1 (base congelada) | 0,502 / 0,430 | **0,428 / 0,412** |
+| ResNet50 fase 2 (conv5 descongelado) | **0,614 / 0,521** | 0,425 / 0,409 |
+
+- Modelo final elegido **por F1 macro en validación** (regla 3 del CLAUDE.md). En identidad gana
+  la fase 2. En emoción la fase 2 no mejora (0,412 → 0,409, diferencia dentro del ruido); el
+  notebook evalúa la fase 2 para ambas tareas, por lo que el test de emoción corresponde a fase 2.
+- Prueba de permutación aplicada a la CNN: identidad 0,192 → 0,150 en val, pero 77 % en train
+  con píxeles permutados → la CNN memoriza.
+
+**Test (evaluado una sola vez, sección 9):**
+
+| Modelo | Identidad acc / F1m | Emoción acc / F1m |
+|---|---|---|
+| CNN propia | 0,190 / 0,171 | 0,232 / 0,221 |
+| ResNet50 fase 2 | **0,589 / 0,515** | **0,383 / 0,371** |
+
+- Emoción por clase (F1): alegría 0,63 · enojo 0,31 · neutral 0,34 · sorpresa 0,32 · tristeza 0,25.
+  La validación (42,5 %) coincide con el acuerdo entre etiquetadores de TP1 (42,6 %): el techo
+  lo ponen las etiquetas, no el modelo.
+- Identidad, pares más confundidos: javier_milei→tini_stoessel 20 · ricardo_darin→pablo_echarri 15 ·
+  dolores_fonzi→mora_bianchi 14 · tini_stoessel→lali_esposito 14 · eva_de_dominici→tini_stoessel 9.
+  julio_chavez y ricardo_darin con recall 0 en test (ambos con R4: un solo video en val/test).
+- Oclusión (sección 10): en identidad parte de la evidencia cae fuera de la cara (micrófono,
+  mano, fondo, esquinas) → atajos de la fuente. En emoción, alegría se decide por la boca; en
+  Milei la evidencia se reparte e incluye el zócalo de TV.
+
+**Conclusiones** (volcadas en la sección 11 del notebook): transferencia es la decisión que más
+pesa; fine-tuning sólo ayuda en identidad; emoción está en el techo de las etiquetas; identidad
+usa atajos del video. Limitaciones: pocos videos por actor, R4 en 9 actores, faltan Pachu Peña y
+Rodrigo de la Serna, recortes no homogéneos, una sola semilla, un etiquetador por imagen.
+
+**Quién:** Francisco Miles (con Claude). **Alternativas no exploradas por tiempo:** re-recorte con
+detector de rostros, EfficientNet/MobileNet, cabeza multitarea, promedio por frames vecinos.
+
 ## Pendientes
-- Corrida completa con GPU y completar resultados de D-007 / D-008.
-- D-010 Evaluación final en test (una sola vez) + oclusión + conclusiones.
 - Avisar al responsable del Drive sobre Pachu Peña (ñ) y Rodrigo de la Serna.
+- (Opcional) Repetir con 3 semillas para reportar media ± desvío.
