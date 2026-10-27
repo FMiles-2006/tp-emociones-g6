@@ -189,6 +189,35 @@ Rodrigo de la Serna, recortes no homogéneos, una sola semilla, un etiquetador p
 **Quién:** Francisco Miles (con Claude). **Alternativas no exploradas por tiempo:** re-recorte con
 detector de rostros, EfficientNet/MobileNet, cabeza multitarea, promedio por frames vecinos.
 
+## D-013 · Se mejora la CNN propia: la que compite es una red desde cero — 2026-10-27
+**Contexto:** en la presentación cada grupo predice actor y emoción de fotos nuevas con su CNN
+**desde cero** (sin pesos preentrenados); el profesor habilitó cambiar hiperparámetros y
+arquitectura. ResNet50 queda como referencia, no compite.
+**Qué:** CNN propia v2: bloques residuales (~1,24 M parámetros, igual presupuesto que la v1),
+**una red con dos salidas** (actor y emoción), aumentación fuerte (gris y borrado aleatorio),
+label smoothing 0,1, AdamW con tasa coseno y calentamiento, 120 épocas fijas, TTA con espejo.
+**Por qué:** la v1 memoriza el video (train 89 %, val 19 %); cada cambio ataca el sobreajuste.
+Multitarea porque la competencia pide las dos cosas de cada foto.
+**Resultado (val):** v2 con rostro alineado 0,292 / 0,334; v2 con recorte original 0,357 / 0,304
+(identidad / emoción). La v1 daba 0,192 / 0,255. Detalle en `docs/EXPERIMENTOS_CNN.md` (E1–E3).
+**Quién:** Francisco Miles (con Claude).
+
+## D-014 · Entrada de la CNN: recorte original del curso, no rostro alineado — 2026-10-27
+**Qué:** la CNN v2 se entrena con el recorte del curso reducido a 112×112. La detección de rostro
+(YuNet) se usa para encuadrar las fotos nuevas igual que el curso: cuadrado centrado en la cara,
+de lado = ancho de la cara / 0,527 (mediana medida sobre los 2.723 recortes del curso).
+**Por qué:** búsqueda E4–E8 en validación: alinear con la plantilla de 5 puntos ajustada (0,85)
+mejora emoción (+3 puntos) pero baja identidad (−6,5); con más margen (0,65 / 0,55) empeora
+todo porque los recortes del curso no tienen más imagen alrededor y el relleno de bordes mete
+rayas. Con el recorte original la identidad es la mejor en todas las comparaciones.
+**Alternativas descartadas:** alineación 0,85 (pierde pelo y contorno de la cabeza), 0,65 y 0,55
+(bordes artificiales). Se reserva la alineación ajustada como opción para una red de emoción.
+**Riesgo declarado:** parte de la ventaja del recorte original puede venir de fondos parecidos
+entre videos del mismo canal, que no se repiten en fotos nuevas.
+**Quién:** Francisco Miles (con Claude).
+
 ## Pendientes
 - Avisar al responsable del Drive sobre Pachu Peña (ñ) y Rodrigo de la Serna.
 - (Opcional) Repetir con 3 semillas para reportar media ± desvío.
+- Elegir la configuración final de la CNN v2 (búsqueda 2) y correr el notebook de punta a punta.
+- Al final: código para subir fotos y predecir (pedido del grupo).
