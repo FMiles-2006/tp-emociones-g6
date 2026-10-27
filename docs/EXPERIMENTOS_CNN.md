@@ -24,6 +24,7 @@ actor y emoción de fotos nuevas. Sin pesos preentrenados.
 | E6 | Búsqueda (80 ép.): alineado 0,65 + mixup 0,2 | 0,238 / 0,221 | 0,255 / 0,210 | 0,915 | Mixup baja el sobreajuste pero no mejora validación |
 | E7 | Búsqueda (80 ép.): alineado 0,55 + mixup 0,2 | 0,215 / 0,185 | 0,222 / 0,202 | 0,916 | Peor: el margen extra sale de bordes replicados |
 | E8 | Búsqueda (80 ép.): sin alinear + mixup 0,2 | **0,311 / 0,286** | 0,271 / 0,231 | 0,927 | Mejor identidad de la búsqueda: confirma el recorte original |
+| E9 | Búsqueda 2 (120 ép.): recorte original + mixup 0,2 | 0,334 / 0,309 | **0,343 / 0,324** | 0,957 | Identidad igual a E3 (F1), emoción +4 puntos: mejor equilibrio |
 
 ## Detalle
 
@@ -81,3 +82,9 @@ de la competencia se reproduce ese encuadre: en los recortes del curso la cara (
 mide en mediana **52,7 % del lado** (p10 37,9 %, p90 70,0 %) y está centrada (centro x 0,50,
 centro y 0,50). Una foto nueva se recorta con un cuadrado centrado en la cara de lado
 ancho_cara / 0,527. La alineación ajustada se reserva como opción para emoción.
+
+### E9–E11 · Búsqueda 2: sobre el recorte original, 120 épocas (2026-10-27)
+Referencia: E3 (recorte original sin mixup) = identidad 0,357 / 0,311, emoción 0,304 / 0,282.
+- **E9 · + mixup 0,2:** identidad 0,334 / 0,309 (igual en F1), emoción **0,343 / 0,324** (+4 puntos
+  de accuracy, +0,042 de F1). Train actor 95,7 % (vs 98,8 %): mixup sí frena la memorización
+  cuando el entrenamiento es largo. 678 s.
