@@ -14,13 +14,14 @@ Martín Masuelli · Francisco Miles · Tomás Lizazu · Bautista Verna · Juan D
 4. **Entorno de ejecución → Ejecutar todas** y aceptá el permiso de Drive. El Drive se monta
    en **solo lectura**: el notebook no puede modificar nada del curso.
 
-Duración aproximada con GPU T4: 30–40 minutos.
+Duración aproximada con GPU T4: 60–70 minutos.
 
 ## Qué hay en el repo
 | Ruta | Contenido |
 |---|---|
 | `notebooks/TP2_Grupo6.ipynb` | Notebook de la entrega con **todo el código**, de punta a punta |
 | `docs/BITACORA.md` | Registro de **todas** las decisiones con su porqué |
+| `docs/EXPERIMENTOS_CNN.md` | Cada configuración de la CNN propia que se probó y su resultado (insumo del informe) |
 | `CLAUDE.md` | Reglas del proyecto (las lee Claude Code de cada integrante) |
 
 ## Cómo trabajar en grupo

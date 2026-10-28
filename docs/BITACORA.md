@@ -189,6 +189,65 @@ Rodrigo de la Serna, recortes no homogéneos, una sola semilla, un etiquetador p
 **Quién:** Francisco Miles (con Claude). **Alternativas no exploradas por tiempo:** re-recorte con
 detector de rostros, EfficientNet/MobileNet, cabeza multitarea, promedio por frames vecinos.
 
+## D-013 · Se mejora la CNN propia: la que compite es una red desde cero — 2026-10-27
+**Contexto:** en la presentación cada grupo predice actor y emoción de fotos nuevas con su CNN
+**desde cero** (sin pesos preentrenados); el profesor habilitó cambiar hiperparámetros y
+arquitectura. ResNet50 queda como referencia, no compite.
+**Qué:** CNN propia v2: bloques residuales (~1,24 M parámetros, igual presupuesto que la v1),
+**una red con dos salidas** (actor y emoción), aumentación fuerte (gris y borrado aleatorio),
+label smoothing 0,1, AdamW con tasa coseno y calentamiento, 120 épocas fijas, TTA con espejo.
+**Por qué:** la v1 memoriza el video (train 89 %, val 19 %); cada cambio ataca el sobreajuste.
+Multitarea porque la competencia pide las dos cosas de cada foto.
+**Resultado (val):** v2 con rostro alineado 0,292 / 0,334; v2 con recorte original 0,357 / 0,304
+(identidad / emoción). La v1 daba 0,192 / 0,255. Detalle en `docs/EXPERIMENTOS_CNN.md` (E1–E3).
+**Quién:** Francisco Miles (con Claude).
+
+## D-014 · Entrada de la CNN: recorte original del curso, no rostro alineado — 2026-10-27
+**Qué:** la CNN v2 se entrena con el recorte del curso reducido a 112×112. La detección de rostro
+(YuNet) se usa para encuadrar las fotos nuevas igual que el curso: cuadrado centrado en la cara,
+de lado = ancho de la cara / 0,527 (mediana medida sobre los 2.723 recortes del curso).
+**Por qué:** búsqueda E4–E8 en validación: alinear con la plantilla de 5 puntos ajustada (0,85)
+mejora emoción (+3 puntos) pero baja identidad (−6,5); con más margen (0,65 / 0,55) empeora
+todo porque los recortes del curso no tienen más imagen alrededor y el relleno de bordes mete
+rayas. Con el recorte original la identidad es la mejor en todas las comparaciones.
+**Alternativas descartadas:** alineación 0,85 (pierde pelo y contorno de la cabeza), 0,65 y 0,55
+(bordes artificiales). Se reserva la alineación ajustada como opción para una red de emoción.
+**Riesgo declarado:** parte de la ventaja del recorte original puede venir de fondos parecidos
+entre videos del mismo canal, que no se repiten en fotos nuevas.
+**Quién:** Francisco Miles (con Claude).
+
+## D-015 · La CNN final usa solo técnicas vistas en la cátedra (v3) — 2026-10-27
+**Qué:** la CNN que se entrega y compite (v3) usa solo herramientas del programa: bloques
+residuales con `Add` (NB13), dos salidas con la API Functional (clase 10), capas de aumentación
+(NB03/NB16, clase 17), Dropout + L2 + EarlyStopping (NB07), pesos por clase (NB08), Adam (NB06) y
+**búsqueda de hiperparámetros con KerasTuner** (NB09). También se quita ReduceLROnPlateau de la v1 y
+de ResNet50. Lo que no se vio (D-013/D-014: alineación de rostros con YuNet, mixup, label smoothing,
+AdamW, tasa coseno, borrado/gris aleatorio, TTA, conjunto de redes) pasa al **Anexo A** del
+notebook, plegado, con su código y sus números (E2–E13), sin borrar nada.
+**Por qué:** pedido del grupo: cada decisión tiene que poder defenderse con el material del curso,
+aunque una técnica externa rinda más (E12: 0,360 / 0,418 en val con mixup).
+**Alternativas descartadas:** usar mixup y justificarlo en el informe (descartado por el grupo).
+**Reemplaza:** D-013 y D-014 en lo que respecta a la CNN final (quedan como historia del anexo).
+**Quién:** Francisco Miles (con Claude).
+
+## D-016 · Mejoras dentro del programa: aumentación en KerasTuner, ResNet50 conv4+conv5 y exclusión de actores — 2026-10-28
+**Qué:**
+1. KerasTuner (NB09) busca también la **intensidad de la aumentación** (rotación ±7/14/22°, zoom
+   5/10/15 %, brillo/contraste 10/20/30 %), además de lr, dropout, L2 y ancho; 12 intentos.
+2. ResNet50, fase 2 (NB15): se prueban **dos variantes** desde los mismos pesos de la fase 1: descongelar
+   solo conv5, y conv4 + conv5. Queda la de mejor F1 macro en validación.
+3. Opción `ACTORES_EXCLUIDOS` en 1.1 (habilitada por el profesor solo para nuestro grupo) y nueva
+   sección 8.3 con el **recall por actor en validación** de la CNN v3 y ResNet50. Criterio: un actor
+   es candidato si ninguno de los dos modelos lo reconoce (recall < 0,05) y tiene pocos videos. Se
+   decide con validación, nunca con test, y se informa con y sin exclusión. Se busca conservar la
+   mayor cantidad de actores posible.
+**Por qué:** pedido del grupo de mejorar sin salir del programa y vigilando el sobreajuste. El techo
+de emoción (42,6 %) se tomó de nuestro control cruzado del TP1, sobre las imágenes de un solo grupo:
+con el dataset unificado es una **referencia aproximada**, no un techo medido.
+**Quién:** Francisco Miles (con Claude).
+
 ## Pendientes
 - Avisar al responsable del Drive sobre Pachu Peña (ñ) y Rodrigo de la Serna.
 - (Opcional) Repetir con 3 semillas para reportar media ± desvío.
+- Elegir la configuración final de la CNN v2 (búsqueda 2) y correr el notebook de punta a punta.
+- Al final: código para subir fotos y predecir (pedido del grupo).
