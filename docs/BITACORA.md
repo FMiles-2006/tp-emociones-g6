@@ -230,6 +230,36 @@ aunque una técnica externa rinda más (E12: 0,360 / 0,418 en val con mixup).
 **Reemplaza:** D-013 y D-014 en lo que respecta a la CNN final (quedan como historia del anexo).
 **Quién:** Francisco Miles (con Claude).
 
+## D-016 · Mejoras dentro del programa: aumentación en KerasTuner, ResNet50 conv4+conv5 y exclusión de actores — 2026-10-28
+**Qué:**
+1. KerasTuner (NB09) busca también la **intensidad de la aumentación** (rotación ±7/14/22°, zoom
+   5/10/15 %, brillo/contraste 10/20/30 %), además de lr, dropout, L2 y ancho; 12 intentos.
+2. ResNet50, fase 2 (NB15): se prueban **dos variantes** desde los mismos pesos de la fase 1: descongelar
+   solo conv5, y conv4 + conv5. Queda la de mejor F1 macro en validación.
+3. Opción `ACTORES_EXCLUIDOS` en 1.1 (habilitada por el profesor solo para nuestro grupo) y nueva
+   sección 8.3 con el **recall por actor en validación** de la CNN v3 y ResNet50. Criterio: un actor
+   es candidato si ninguno de los dos modelos lo reconoce (recall < 0,05) y tiene pocos videos. Se
+   decide con validación, nunca con test, y se informa con y sin exclusión. Se busca conservar la
+   mayor cantidad de actores posible.
+**Por qué:** pedido del grupo de mejorar sin salir del programa y vigilando el sobreajuste. El techo
+de emoción (42,6 %) se tomó de nuestro control cruzado del TP1, sobre las imágenes de un solo grupo:
+con el dataset unificado es una **referencia aproximada**, no un techo medido.
+**Quién:** Francisco Miles (con Claude).
+
+## D-017 · Elegir por accuracy de validación, no por val_loss — 2026-10-28
+**Qué:** KerasTuner usa como objetivo `val_acc_total` = accuracy de validación de actor + de emoción
+(maximizar), y el early stopping de todos los modelos vigila el accuracy de validación en lugar de
+`val_loss`. Rango de lr de la búsqueda: 3e-4 a 3e-3. Se corrige además la sección 10 (la oclusión de
+la v3 recibía imágenes de 224 en vez de 112).
+**Por qué:** en la primera corrida completa de la v3 (E14) KerasTuner eligió el intento de menor
+`val_loss` (4,98), que tenía 6,5 % de accuracy en actor, y descartó uno con `val_loss` 5,04 y 35,3 % /
+35,3 %. Con pocos videos por actor la red se vuelve sobreconfiada y la pérdida deja de reflejar los
+aciertos. NB09 de la cátedra usa `objective="val_accuracy"`.
+**Alternativas descartadas:** F1 macro como objetivo (no es una métrica de Keras en la versión vista;
+se sigue reportando aparte).
+**Pendiente de decidir:** excluir a julio_chavez (D-016): un solo video para val/test (6 + 6 imágenes).
+**Quién:** Francisco Miles (con Claude).
+
 ## Pendientes
 - Avisar al responsable del Drive sobre Pachu Peña (ñ) y Rodrigo de la Serna.
 - (Opcional) Repetir con 3 semillas para reportar media ± desvío.
