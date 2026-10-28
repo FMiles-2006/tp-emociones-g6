@@ -230,6 +230,22 @@ aunque una técnica externa rinda más (E12: 0,360 / 0,418 en val con mixup).
 **Reemplaza:** D-013 y D-014 en lo que respecta a la CNN final (quedan como historia del anexo).
 **Quién:** Francisco Miles (con Claude).
 
+## D-016 · Mejoras dentro del programa: aumentación en KerasTuner, ResNet50 conv4+conv5 y exclusión de actores — 2026-10-28
+**Qué:**
+1. KerasTuner (NB09) busca también la **intensidad de la aumentación** (rotación ±7/14/22°, zoom
+   5/10/15 %, brillo/contraste 10/20/30 %), además de lr, dropout, L2 y ancho; 12 intentos.
+2. ResNet50, fase 2 (NB15): se prueban **dos variantes** desde los mismos pesos de la fase 1: descongelar
+   solo conv5, y conv4 + conv5. Queda la de mejor F1 macro en validación.
+3. Opción `ACTORES_EXCLUIDOS` en 1.1 (habilitada por el profesor solo para nuestro grupo) y nueva
+   sección 8.3 con el **recall por actor en validación** de la CNN v3 y ResNet50. Criterio: un actor
+   es candidato si ninguno de los dos modelos lo reconoce (recall < 0,05) y tiene pocos videos. Se
+   decide con validación, nunca con test, y se informa con y sin exclusión. Se busca conservar la
+   mayor cantidad de actores posible.
+**Por qué:** pedido del grupo de mejorar sin salir del programa y vigilando el sobreajuste. El techo
+de emoción (42,6 %) se tomó de nuestro control cruzado del TP1, sobre las imágenes de un solo grupo:
+con el dataset unificado es una **referencia aproximada**, no un techo medido.
+**Quién:** Francisco Miles (con Claude).
+
 ## Pendientes
 - Avisar al responsable del Drive sobre Pachu Peña (ñ) y Rodrigo de la Serna.
 - (Opcional) Repetir con 3 semillas para reportar media ± desvío.
