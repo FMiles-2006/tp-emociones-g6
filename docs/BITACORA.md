@@ -246,6 +246,20 @@ de emoción (42,6 %) se tomó de nuestro control cruzado del TP1, sobre las imá
 con el dataset unificado es una **referencia aproximada**, no un techo medido.
 **Quién:** Francisco Miles (con Claude).
 
+## D-017 · Elegir por accuracy de validación, no por val_loss — 2026-10-28
+**Qué:** KerasTuner usa como objetivo `val_acc_total` = accuracy de validación de actor + de emoción
+(maximizar), y el early stopping de todos los modelos vigila el accuracy de validación en lugar de
+`val_loss`. Rango de lr de la búsqueda: 3e-4 a 3e-3. Se corrige además la sección 10 (la oclusión de
+la v3 recibía imágenes de 224 en vez de 112).
+**Por qué:** en la primera corrida completa de la v3 (E14) KerasTuner eligió el intento de menor
+`val_loss` (4,98), que tenía 6,5 % de accuracy en actor, y descartó uno con `val_loss` 5,04 y 35,3 % /
+35,3 %. Con pocos videos por actor la red se vuelve sobreconfiada y la pérdida deja de reflejar los
+aciertos. NB09 de la cátedra usa `objective="val_accuracy"`.
+**Alternativas descartadas:** F1 macro como objetivo (no es una métrica de Keras en la versión vista;
+se sigue reportando aparte).
+**Pendiente de decidir:** excluir a julio_chavez (D-016): un solo video para val/test (6 + 6 imágenes).
+**Quién:** Francisco Miles (con Claude).
+
 ## Pendientes
 - Avisar al responsable del Drive sobre Pachu Peña (ñ) y Rodrigo de la Serna.
 - (Opcional) Repetir con 3 semillas para reportar media ± desvío.

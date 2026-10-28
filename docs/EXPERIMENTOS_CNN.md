@@ -34,6 +34,7 @@ actor y emoción de fotos nuevas. Sin pesos preentrenados.
 | E11 | Búsqueda 2 (120 ép.): recorte original a 64×64 | 0,343 / 0,319 | 0,299 / 0,288 | 0,986 | Identidad igual, emoción peor (se pierde detalle de boca y ojos); 40 % más rápida |
 | E12 | Búsqueda 3: recorte original + mixup 0,2, **200 épocas** | **0,360 / 0,344** | **0,418 / 0,400** | 0,969 | Mejor de todas: emoción casi en el techo humano (42,6 %) |
 | E13 | Búsqueda 3: conjunto de 3 redes (mixup, 120 ép. c/u) | 0,350 / 0,311 | 0,388 / 0,368 | ~0,96 | No mejora a una sola red (0,348 / 0,407): no vale el costo ×3 |
+| **E14** | **v3 solo cátedra**, KerasTuner por `val_loss` (10 intentos) → base 48, dropout 0,1, L2 1e-4, lr 1,26e-4 | 0,252 / 0,224 | 0,290 / 0,270 | — | Debajo del RF: KerasTuner eligió por pérdida un intento que casi no aprendía |
 
 ## Detalle
 
@@ -127,3 +128,20 @@ Se revisó el programa (EVA, AULA.html) y los notebooks de práctica NB03–NB16
   ReduceLROnPlateau), borrado/gris aleatorio, conjuntos de redes, TTA, detectores de rostro.
 
 Decisión del grupo: la CNN final usa **solo lo visto** (v3). Ver E14 en adelante.
+
+### E14 · v3 solo cátedra, primera corrida completa (2026-10-28, corrida del grupo)
+Notebook `cnn-v2` (985c7e4), mismo dataset y partición (huella `512b8d7c66ec`, 154 videos).
+- KerasTuner (`RandomSearch`, 10 intentos, 2.833 s) con objetivo **`val_loss`** eligió base 48,
+  dropout 0,1, L2 1e-4, **lr 1,26e-4**. Modelo final (42 épocas, early stopping por `val_loss`):
+  validación identidad **0,252 / 0,224**, emoción **0,290 / 0,270**; test 0,237 / 0,200 y 0,270 / 0,261.
+- **Error de diseño encontrado:** el intento elegido tenía la menor `val_loss` (4,98) pero **6,5 %** de
+  accuracy en actor; el intento 1 (lr 4e-4, dropout 0,2) tenía `val_loss` 5,04 y **35,3 % / 35,3 %**.
+  Con pocos videos la red se vuelve sobreconfiada: cada error cuesta mucha pérdida, así que
+  `val_loss` y accuracy dejan de ir juntos. Lo mismo afecta al early stopping.
+- Corrección (D-017): KerasTuner y el early stopping eligen por **accuracy de validación** (suma de
+  actor + emoción), como el `objective="val_accuracy"` de NB09; lr entre 3e-4 y 3e-3.
+- Referencias de la misma corrida (val): RF 0,334 / 0,277 · v1 0,227 / 0,170 y 0,271 / 0,271 ·
+  ResNet50 fase 2 0,624 / 0,530 y 0,425 / 0,409 (test 0,608 / 0,536 y 0,383 / 0,371).
+- ResNet50 en test, recall 0 para julio_chavez (6 imágenes) y ricardo_darin (15, confundido con
+  pablo_echarri). Pares más confundidos: tini→lali 19, darin→echarri 15, fonzi→mora_bianchi 14,
+  milei→fonzi 12. Francella (293 imágenes de train) F1 0,91.
