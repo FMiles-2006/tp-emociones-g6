@@ -260,6 +260,23 @@ se sigue reportando aparte).
 **Pendiente de decidir:** excluir a julio_chavez (D-016): un solo video para val/test (6 + 6 imágenes).
 **Quién:** Francisco Miles (con Claude).
 
+## D-018 · Búsqueda afinada y una red por tarea como variante de la v3 — 2026-10-29
+**Qué:** (1) KerasTuner busca en un rango afinado alrededor del mejor intento de E15: base 48–64,
+dropout 0,3–0,5, L2 0 o 1e-4, lr 8e-4–2,5e-3, aumentación suave (rotación 0,02–0,04, zoom 0,05–0,10,
+color 0,1–0,2); 10 intentos. (2) Con los hiperparámetros elegidos se entrena además la v3 con **una red
+por tarea** (misma arquitectura, una sola salida, pesos por clase solo de esa tarea) y, por tarea, se
+usa la variante de mejor F1 macro en validación. (3) No se excluye ningún actor (supera a D-016/D-017
+como pendiente).
+**Por qué:** en E15 los intentos con base 16 y la aumentación fuerte quedaron entre los peores: la
+búsqueda gastaba la mitad de los intentos en una zona mala. La v3 tiene recall 0 en 7 actores; con dos
+salidas la emoción puede competir con la identidad por el mismo tronco, y la v1 (una red por tarea) es
+el antecedente. Julio Chávez tuvo recall 0,50 con la v3 en E15: la exclusión ya no se justifica con
+datos; el único actor que fallan los dos modelos (Eva De Dominici) tiene 8 videos, así que no es falta
+de datos y excluirlo solo inflaría la métrica.
+**Alternativas descartadas:** pesos distintos por salida en la pérdida (no lo vimos en la cátedra);
+más intentos con el rango amplio (más de 1 h y no cabe antes de la entrega).
+**Quién:** Francisco Miles (con Claude).
+
 ## Pendientes
 - Avisar al responsable del Drive sobre Pachu Peña (ñ) y Rodrigo de la Serna.
 - (Opcional) Repetir con 3 semillas para reportar media ± desvío.
