@@ -35,6 +35,7 @@ actor y emoción de fotos nuevas. Sin pesos preentrenados.
 | E12 | Búsqueda 3: recorte original + mixup 0,2, **200 épocas** | **0,360 / 0,344** | **0,418 / 0,400** | 0,969 | Mejor de todas: emoción casi en el techo humano (42,6 %) |
 | E13 | Búsqueda 3: conjunto de 3 redes (mixup, 120 ép. c/u) | 0,350 / 0,311 | 0,388 / 0,368 | ~0,96 | No mejora a una sola red (0,348 / 0,407): no vale el costo ×3 |
 | **E14** | **v3 solo cátedra**, KerasTuner por `val_loss` (10 intentos) → base 48, dropout 0,1, L2 1e-4, lr 1,26e-4 | 0,252 / 0,224 | 0,290 / 0,270 | — | Debajo del RF: KerasTuner eligió por pérdida un intento que casi no aprendía |
+| **E15** | **v3 solo cátedra**, KerasTuner por accuracy de validación (12 intentos, aumentación en la búsqueda) → base 48, dropout 0,4, L2 0, lr 1,5e-3, rot 0,04 / zoom 0,05 / color 0,1 | 0,355 / 0,281 | 0,350 / 0,305 | — | Mejora a E14 en las dos tareas y supera al RF; 7 actores con recall 0 |
 
 ## Detalle
 
@@ -145,3 +146,19 @@ Notebook `cnn-v2` (985c7e4), mismo dataset y partición (huella `512b8d7c66ec`, 
 - ResNet50 en test, recall 0 para julio_chavez (6 imágenes) y ricardo_darin (15, confundido con
   pablo_echarri). Pares más confundidos: tini→lali 19, darin→echarri 15, fonzi→mora_bianchi 14,
   milei→fonzi 12. Francella (293 imágenes de train) F1 0,91.
+
+### E15 · v3 con selección por accuracy (D-017), corrida del 29/10
+Notebook `cnn-v2` (9bb33da), huella `512b8d7c66ec`, 154 videos, misma partición que E14.
+- KerasTuner (12 intentos, 2.973 s) por `val_acc_total`. Elegido: base 48, dropout 0,4, L2 0,
+  lr 1,5e-3, aumentación suave (rotación 0,04, zoom 0,05, color 0,1). Los 3 mejores intentos tienen
+  base 32–48; la aumentación más fuerte (rotación 0,06 / zoom 0,15) quedó entre los peores.
+- Modelo final (66 épocas): validación identidad **0,355 / 0,281**, emoción **0,350 / 0,305**
+  (E14: 0,252 / 0,224 y 0,290 / 0,270). Test: 0,326 / 0,250 y 0,286 / 0,264.
+- Referencias (val): RF 0,334 / 0,277 y 0,255 / 0,167 · v1 0,287 / 0,249 y 0,264 / 0,256 ·
+  ResNet50 conv4+conv5 0,654 / 0,550 y 0,477 / 0,455 (test 0,660 / 0,547 y 0,362 / 0,341).
+- Recall por actor (val, 8.3): la v3 tiene recall 0 en azzaro, colapinto, eva_de_dominici,
+  erica_rivas, mora_bianchi, javier_milei y scaloni; 1,0 en momo y dario_barassi. julio_chavez:
+  v3 0,50, ResNet 0,33 (en test ResNet 0). Único candidato con recall < 0,05 en los dos modelos:
+  eva_de_dominici (8 videos, no es falta de videos).
+- La caída val → test de ResNet en emoción (0,477 → 0,362) muestra el sesgo de elegir entre muchas
+  variantes con solo 428 imágenes de validación.
