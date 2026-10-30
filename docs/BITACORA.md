@@ -295,6 +295,18 @@ dos salidas) y ResNet descongela directamente conv4+conv5 (la variante que ganó
 completo (correcto pero difícil de seguir en la presentación).
 **Quién:** Francisco Miles (con Claude).
 
+## D-020 · Entrega de avances sin la sección de predicción; resultados de E17 — 2026-10-30
+**Qué:** se saca del notebook final la sección de predicción sobre fotos nuevas (subir foto y guardar
+modelos): la entrega de hoy es de avances de la CNN y de ResNet50, no la competencia. Las conclusiones del
+notebook se reescriben con la corrida E17 y se compara con E16. Modifica D-019.
+**Por qué:** pedido del grupo; CLAUDE.md ya indicaba agregar ese código recién al final. E17 confirma la
+CNN de identidad (0,451 val, 0,369 test) pero muestra que la de emoción es inestable entre corridas
+(test 0,298 en E16, 0,216 en E17): se informa así, sin elegir la corrida más favorable.
+**Pendiente para la entrega final:** estabilizar la CNN de emoción (por ejemplo, más paciencia o
+promediar varias semillas al elegir en validación) y volver a agregar la predicción de fotos nuevas
+(el código queda en el historial del repo, commit c41cfb2).
+**Quién:** Francisco Miles (con Claude).
+
 ## Pendientes
 - Avisar al responsable del Drive sobre Pachu Peña (ñ) y Rodrigo de la Serna.
 - (Opcional) Repetir con 3 semillas para reportar media ± desvío.

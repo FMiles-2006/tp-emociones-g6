@@ -37,6 +37,7 @@ actor y emoción de fotos nuevas. Sin pesos preentrenados.
 | **E14** | **v3 solo cátedra**, KerasTuner por `val_loss` (10 intentos) → base 48, dropout 0,1, L2 1e-4, lr 1,26e-4 | 0,252 / 0,224 | 0,290 / 0,270 | — | Debajo del RF: KerasTuner eligió por pérdida un intento que casi no aprendía |
 | **E15** | **v3 solo cátedra**, KerasTuner por accuracy de validación (12 intentos, aumentación en la búsqueda) → base 48, dropout 0,4, L2 0, lr 1,5e-3, rot 0,04 / zoom 0,05 / color 0,1 | 0,355 / 0,281 | 0,350 / 0,305 | — | Mejora a E14 en las dos tareas y supera al RF; 7 actores con recall 0 |
 | **E16** | **v3 final**: búsqueda afinada (10 intentos) → base 48, dropout 0,4, L2 0, lr 1,4e-3, rot 0,04 / zoom 0,10 / color 0,1; **una red por tarea** | 0,414 / 0,361 | 0,393 / 0,349 | — | **Mejor CNN propia.** Dos salidas con los mismos HP: 0,355 / 0,284 y 0,362 / 0,302 |
+| **E17** | Misma configuración que E16 (una red por tarea) en el notebook final simplificado | 0,451 / 0,406 | 0,339 / 0,341 | — | Identidad mejor que E16; emoción peor y paró en la época 32: la CNN de emoción es inestable |
 
 ## Detalle
 
@@ -177,3 +178,18 @@ Notebook `cnn-v2` (95b7d55), huella `512b8d7c66ec`, misma partición.
   mora_bianchi; 1,0 en momo, dario_barassi y griselda_siciliani. Eva De Dominici es el único actor
   que fallan los dos modelos.
 - Es la CNN que se entrega y compite (D-019).
+
+### E17 · Notebook final simplificado (2026-10-30)
+`notebooks/TP_Grupo6_Final.ipynb` (c41cfb2), huella `512b8d7c66ec`, misma partición, hiperparámetros fijos de E16.
+- CNN propia, una red por tarea: identidad val **0,451 / 0,406** (70 épocas), test **0,369 / 0,315**;
+  emoción val **0,339 / 0,341** (32 épocas), test **0,216 / 0,203** (accuracy debajo del trivial 0,237,
+  F1 macro arriba del trivial ~0,08).
+- Diferencias con E16: misma arquitectura y regla de parada, pero `class_weight` con etiquetas enteras en
+  lugar de pesos por muestra normalizados (equivalentes en promedio) y ejecución en otra GPU. La variación
+  de emoción (test 0,298 → 0,216) muestra que el accuracy de validación con 428 imágenes es ruidoso y el
+  early stopping puede quedarse con un pico casual.
+- Permutación de píxeles: CNN 0,451 → 0,320 (MLP 0,280 → 0,292).
+- ResNet50 conv4+conv5: val 0,666 / 0,586 y 0,479 / 0,455; test 0,662 / 0,581 y 0,383 / 0,364.
+- Confusiones de la CNN en test (identidad): ricardo_darin → francella 100 %, javier_milei → francella 90 %,
+  mora_bianchi → tini 88 %, candela_vetrano → erica_rivas 85 %. Francella, la clase más grande, atrae
+  a otros actores aun con pesos por clase.
