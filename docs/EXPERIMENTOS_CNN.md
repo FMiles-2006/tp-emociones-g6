@@ -38,6 +38,7 @@ actor y emoción de fotos nuevas. Sin pesos preentrenados.
 | **E15** | **v3 solo cátedra**, KerasTuner por accuracy de validación (12 intentos, aumentación en la búsqueda) → base 48, dropout 0,4, L2 0, lr 1,5e-3, rot 0,04 / zoom 0,05 / color 0,1 | 0,355 / 0,281 | 0,350 / 0,305 | — | Mejora a E14 en las dos tareas y supera al RF; 7 actores con recall 0 |
 | **E16** | **v3 final**: búsqueda afinada (10 intentos) → base 48, dropout 0,4, L2 0, lr 1,4e-3, rot 0,04 / zoom 0,10 / color 0,1; **una red por tarea** | 0,414 / 0,361 | 0,393 / 0,349 | — | **Mejor CNN propia.** Dos salidas con los mismos HP: 0,355 / 0,284 y 0,362 / 0,302 |
 | **E17** | Misma configuración que E16 (una red por tarea) en el notebook final simplificado | 0,451 / 0,406 | 0,339 / 0,341 | — | Identidad mejor que E16; emoción peor y paró en la época 32: la CNN de emoción es inestable |
+| E18 | Variante de un compañero: dos salidas con cabeza propia, `loss_weights` emoción ×3, pesos por clase por salida, parada por F1 macro (paciencia 30) + ReduceLROnPlateau, modelo final con train + val | 0,546 / 0,400 | 0,360 / 0,308 | — | **No comparable**: partición de 129 videos (4 actores sin val/test, 16 evaluados) y técnicas a confirmar con la cátedra |
 
 ## Detalle
 
@@ -193,3 +194,21 @@ Notebook `cnn-v2` (95b7d55), huella `512b8d7c66ec`, misma partición.
 - Confusiones de la CNN en test (identidad): ricardo_darin → francella 100 %, javier_milei → francella 90 %,
   mora_bianchi → tini 88 %, candela_vetrano → erica_rivas 85 %. Francella, la clase más grande, atrae
   a otros actores aun con pesos por clase.
+
+### E18 · Variante de un compañero (notebook "CNN mejorada", 2026-10-30)
+- **Partición distinta:** su Colab no leyó los registros de video de los grupos (129 videos en vez de 154).
+  Fonzi, Milei, Echarri y Darín quedan enteros en train: val (350) y test (341) evalúan **16 actores**,
+  sin los que más se confunden con Francella. Los números no se comparan con E14–E17.
+- Cambios: cabeza propia por tarea en una red de dos salidas; `loss_weights` de emoción elegido por
+  KerasTuner (ganó 3); pesos por clase **por salida** (corrige el producto actor × emoción de D-015);
+  métrica `F1Score` de Keras y parada por el promedio del F1 macro de validación (paciencia 30, hasta 200
+  épocas); `ReduceLROnPlateau`; modelo final reentrenado con train + val (sin los videos R4 que comparte con test).
+- KerasTuner (10 intentos) eligió base 48, dropout 0,2, L2 1e-4, sin cabeza densa, aumentación suave,
+  lr 9,4e-4, peso de emoción 3.
+- Validación (modelo de 7.3): identidad 0,546 / 0,400, emoción 0,360 / 0,308.
+  Test (modelo train + val): identidad 0,405 / 0,316, emoción 0,320 / 0,280.
+  ResNet50 conv5 en su partición: test 0,683 / 0,558 y 0,355 / 0,326.
+- Lectura: el F1 macro de identidad en test es prácticamente el mismo que E17 (0,316 vs 0,315) con 4
+  actores difíciles menos; la mejora real está en **emoción** (0,280 de F1 en test, más estable).
+  Ideas a llevar a nuestro pipeline para la entrega final: pesos por clase por salida, parada por F1 con más
+  paciencia y reentrenar con train + val. `ReduceLROnPlateau` y `loss_weights` hay que confirmarlos con la cátedra.
