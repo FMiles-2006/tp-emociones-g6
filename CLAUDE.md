@@ -23,7 +23,8 @@ alegria, enojo, neutral, sorpresa, tristeza). Todo corre en Google Colab.
    publica fuera del curso.
 
 ## Estructura
-- `notebooks/TP2_Grupo6.ipynb` — **todo el código de la entrega**, autocontenido, en secciones:
+- `notebooks/TP_Grupo6_Final.ipynb` — **notebook corto de la entrega** (CNN final + ResNet50, D-019).
+- `notebooks/TP2_Grupo6.ipynb` — notebook completo con todo el camino, autocontenido, en secciones:
   entorno → datos → partición → baselines → acta de límites → pipeline →
   CNN propia (v1 control, v3 final con KerasTuner) → ResNet50 → test → oclusión → conclusiones →
   Anexo A plegado (versiones anteriores, fuera del programa). Cada función se define una sola vez, en la

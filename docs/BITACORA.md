@@ -277,6 +277,22 @@ de datos y excluirlo solo inflaría la métrica.
 más intentos con el rango amplio (más de 1 h y no cabe antes de la entrega).
 **Quién:** Francisco Miles (con Claude).
 
+## D-019 · Modelo final y notebook de entrega simplificado — 2026-10-30
+**Qué:** la CNN que compite es la v3 de E16 (residual, una red por tarea, hiperparámetros de
+KerasTuner fijos en `HP_CNN`). La entrega se presenta con un notebook corto,
+`notebooks/TP_Grupo6_Final.ipynb` (~570 líneas de código contra ~1.100): entorno, registro,
+partición por video, baselines (trivial y RF), CNN final, ResNet50 conv4+conv5, comparación en
+validación con recall por actor, test una vez, oclusión, predicción sobre fotos nuevas y conclusiones.
+El notebook completo `TP2_Grupo6.ipynb` queda en el repo sin cambios, con todo el camino (v1, KerasTuner,
+anexo con versiones anteriores).
+**Por qué:** tres corridas más no subieron sustancialmente la CNN y la entrega es hoy; el grupo pidió un
+Colab más legible. En el corto se fijan los hiperparámetros (sin repetir 1,5 h de búsqueda), se usa
+`class_weight` con etiquetas enteras (equivalente a los pesos por muestra normalizados de la versión de
+dos salidas) y ResNet descongela directamente conv4+conv5 (la variante que ganó en validación en E15 y E16).
+**Alternativas descartadas:** seguir buscando hiperparámetros (sin tiempo); entregar el notebook
+completo (correcto pero difícil de seguir en la presentación).
+**Quién:** Francisco Miles (con Claude).
+
 ## Pendientes
 - Avisar al responsable del Drive sobre Pachu Peña (ñ) y Rodrigo de la Serna.
 - (Opcional) Repetir con 3 semillas para reportar media ± desvío.

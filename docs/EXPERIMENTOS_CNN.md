@@ -36,6 +36,7 @@ actor y emoción de fotos nuevas. Sin pesos preentrenados.
 | E13 | Búsqueda 3: conjunto de 3 redes (mixup, 120 ép. c/u) | 0,350 / 0,311 | 0,388 / 0,368 | ~0,96 | No mejora a una sola red (0,348 / 0,407): no vale el costo ×3 |
 | **E14** | **v3 solo cátedra**, KerasTuner por `val_loss` (10 intentos) → base 48, dropout 0,1, L2 1e-4, lr 1,26e-4 | 0,252 / 0,224 | 0,290 / 0,270 | — | Debajo del RF: KerasTuner eligió por pérdida un intento que casi no aprendía |
 | **E15** | **v3 solo cátedra**, KerasTuner por accuracy de validación (12 intentos, aumentación en la búsqueda) → base 48, dropout 0,4, L2 0, lr 1,5e-3, rot 0,04 / zoom 0,05 / color 0,1 | 0,355 / 0,281 | 0,350 / 0,305 | — | Mejora a E14 en las dos tareas y supera al RF; 7 actores con recall 0 |
+| **E16** | **v3 final**: búsqueda afinada (10 intentos) → base 48, dropout 0,4, L2 0, lr 1,4e-3, rot 0,04 / zoom 0,10 / color 0,1; **una red por tarea** | 0,414 / 0,361 | 0,393 / 0,349 | — | **Mejor CNN propia.** Dos salidas con los mismos HP: 0,355 / 0,284 y 0,362 / 0,302 |
 
 ## Detalle
 
@@ -162,3 +163,17 @@ Notebook `cnn-v2` (9bb33da), huella `512b8d7c66ec`, 154 videos, misma partición
   eva_de_dominici (8 videos, no es falta de videos).
 - La caída val → test de ResNet en emoción (0,477 → 0,362) muestra el sesgo de elegir entre muchas
   variantes con solo 428 imágenes de validación.
+
+### E16 · v3 final: búsqueda afinada + una red por tarea (2026-10-29, corrida del 29/10 tarde)
+Notebook `cnn-v2` (95b7d55), huella `512b8d7c66ec`, misma partición.
+- KerasTuner (10 intentos, 5.237 s) en el rango afinado de D-018. Elegido: base 48, dropout 0,4,
+  L2 0, lr 1,41e-3, rotación 0,04, zoom 0,10, color 0,1 (val_acc_total 0,804: 0,409 + 0,395).
+- Con esos hiperparámetros: **una red con dos salidas** 0,355 / 0,284 (identidad) y 0,362 / 0,302
+  (emoción); **una red por tarea 0,414 / 0,361 y 0,393 / 0,349** → se eligen las redes separadas.
+  Separar las tareas suma ~6 puntos en identidad y ~3 en emoción: con dos salidas compiten por el tronco.
+- Test (una vez): **0,352 / 0,328** (identidad) y **0,298 / 0,290** (emoción).
+- ResNet50 conv4+conv5 (igual que E15): val 0,654 / 0,550 y 0,477 / 0,455; test 0,660 / 0,547 y 0,362 / 0,341.
+- Recall por actor (val): CNN recall 0 en colapinto, dolores_fonzi, eva_de_dominici, javier_milei y
+  mora_bianchi; 1,0 en momo, dario_barassi y griselda_siciliani. Eva De Dominici es el único actor
+  que fallan los dos modelos.
+- Es la CNN que se entrega y compite (D-019).
