@@ -280,9 +280,11 @@ más intentos con el rango amplio (más de 1 h y no cabe antes de la entrega).
 ## D-019 · Modelo final y notebook de entrega simplificado — 2026-10-30
 **Qué:** la CNN que compite es la v3 de E16 (residual, una red por tarea, hiperparámetros de
 KerasTuner fijos en `HP_CNN`). La entrega se presenta con un notebook corto,
-`notebooks/TP_Grupo6_Final.ipynb` (~570 líneas de código contra ~1.100): entorno, registro,
-partición por video, baselines (trivial y RF), CNN final, ResNet50 conv4+conv5, comparación en
-validación con recall por actor, test una vez, oclusión, predicción sobre fotos nuevas y conclusiones.
+`notebooks/TP_Grupo6_Final.ipynb` (~640 líneas de código contra ~1.100) con todas las secciones:
+entorno, datos, partición por video, baselines (trivial, RF, MLP), acta de límites, pipeline con
+aumentación, CNN final y revancha de la permutación, ResNet50 conv4+conv5, comparación en validación
+con recall por actor, test una vez (matrices de confusión y peores errores), oclusión, predicción sobre
+fotos nuevas, conclusiones y Anexo A (plegado) con las versiones anteriores documentadas.
 El notebook completo `TP2_Grupo6.ipynb` queda en el repo sin cambios, con todo el camino (v1, KerasTuner,
 anexo con versiones anteriores).
 **Por qué:** tres corridas más no subieron sustancialmente la CNN y la entrega es hoy; el grupo pidió un
