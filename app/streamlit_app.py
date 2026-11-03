@@ -163,7 +163,7 @@ Keras (diferencia máxima 0,000006).
 3. Cada red aplica su propia escala por dentro y devuelve una probabilidad por clase (softmax).
 4. Se muestran las 5 opciones más probables y la frase con las 3 primeras.
 
-**Dos apps, el mismo modelo:** esta (Streamlit, para el equipo: predicción + resultados) y el frontend
-para el cliente (Lovable), donde la red corre en el navegador con `onnxruntime-web`. Código y decisiones:
-[github.com/FMiles-2006/tp-emociones-g6](https://github.com/FMiles-2006/tp-emociones-g6) (D-024).
+**Lo que ve el cliente es solo esta app:** sube una foto y recibe actor y emoción; los datos y el
+entrenamiento quedan en el notebook. Código y decisiones:
+[github.com/FMiles-2006/tp-emociones-g6](https://github.com/FMiles-2006/tp-emociones-g6) (D-024, D-025).
 """)

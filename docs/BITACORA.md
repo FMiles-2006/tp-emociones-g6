@@ -372,6 +372,17 @@ solo en planes pagos. Publicar los pesos no publica las fotos; el grupo acepta q
 Keras 3); Base44.
 **Quién:** Francisco Miles (con Claude).
 
+## D-025 · La app de Streamlit es la que ve el cliente; no se hace frontend en Lovable — 2026-11-03
+**Qué:** el producto final para el cliente es la app de Streamlit
+(https://quien-es-y-que-siente-g6.streamlit.app), con predicción por foto y una pestaña de resultados sin
+imágenes del dataset. No se construye el frontend de Lovable previsto en D-024. Las barras y tablas se
+dibujan con HTML/markdown porque los componentes que Streamlit carga aparte fallaban en Community Cloud; el
+recorte se controla con zoom 0–100 % y desplazamiento en palabras. Modifica D-024.
+**Por qué:** decisión del grupo para el informe final: la app de Streamlit ya separa el modelo de los datos
+y da los mismos porcentajes que el notebook; un segundo frontend no agrega contenido a la defensa.
+**Alternativas descartadas:** Lovable o Base44 con onnxruntime-web (créditos limitados y más trabajo).
+**Quién:** Francisco Miles (con Claude).
+
 ## Pendientes
 - Avisar al responsable del Drive sobre Pachu Peña (ñ) y Rodrigo de la Serna.
 - (Opcional) Repetir con 3 semillas para reportar media ± desvío.
