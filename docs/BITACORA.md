@@ -340,6 +340,19 @@ de videos distintos de Lali sin ganar nada); no corregir y declararlo como limit
 actores quedaban inflados).
 **Quién:** Francisco Miles (con Claude).
 
+## D-023 · Modelo final congelado (E19) y prueba con fotos de la web — 2026-11-03
+**Qué:** la CNN propia y ResNet50 quedan como en E19 (partición corregida de D-022); no se hacen más
+corridas de mejora. La sección 12 predice todas las fotos de `/content/fotos_nuevas` con un resumen al
+final. Prueba con 4 fotos de la web (Tini, Lali, Colapinto, Francella): la CNN acierta 1 (Tini, 31 %);
+ResNet50 ninguna como primera opción (Francella segundo, 39 %), con errores de confianza alta (96–100 %).
+**Por qué:** el profesor indicó que lo central de la entrega es la defensa del proceso y de sus mejoras;
+no se permite sumar fotos de otras fuentes ni usar un detector de caras. El resultado con fotos de la web
+se presenta como limitación: con pocos videos por actor, los modelos aprenden cómo se ve cada actor en
+esos videos y no generalizan a fotos de otras fuentes.
+**Alternativas descartadas:** test de la web con ~60 fotos, reentrenar con train + val, aumentación más
+fuerte, varias semillas (quedan como trabajo futuro).
+**Quién:** Francisco Miles (con Claude).
+
 ## Pendientes
 - Avisar al responsable del Drive sobre Pachu Peña (ñ) y Rodrigo de la Serna.
 - (Opcional) Repetir con 3 semillas para reportar media ± desvío.
