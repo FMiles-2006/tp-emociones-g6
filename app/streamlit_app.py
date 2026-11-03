@@ -73,10 +73,18 @@ with tab_pred:
             img = abrir_imagen(archivo)
             st.markdown("**Recortá la cara.** Las redes se entrenaron con recortes de rostro: "
                         "cuanto más ocupe la cara, mejor.")
-            tamano = st.slider("Tamaño del recorte", 0.2, 1.0, 1.0, 0.05)
-            cx = st.slider("Horizontal", 0.0, 1.0, 0.5, 0.01)
-            cy = st.slider("Vertical", 0.0, 1.0, 0.5, 0.01)
-            recorte = recortar(img, tamano, cx, cy)
+            # Controles en palabras: zoom de 0 % (foto entera) a 100 % (máximo acercamiento)
+            # y desplazamiento del recorte hacia la izquierda/derecha y arriba/abajo, partiendo del centro.
+            zoom = st.slider("🔍 Zoom", 0, 100, 0, 5, format="%d %%",
+                             help="0 %: el cuadrado más grande de la foto. 100 %: lo más cerca posible.")
+            lado_h = lambda v: "centro" if v == 0 else (f"{abs(v)} % más a la izquierda" if v < 0
+                                                         else f"{v} % más a la derecha")
+            lado_v = lambda v: "centro" if v == 0 else (f"{abs(v)} % más arriba" if v < 0 else f"{v} % más abajo")
+            mover_x = st.select_slider("↔️ Izquierda · derecha", options=list(range(-50, 51, 2)), value=0,
+                                       format_func=lado_h)
+            mover_y = st.select_slider("↕️ Arriba · abajo", options=list(range(-50, 51, 2)), value=0,
+                                       format_func=lado_v)
+            recorte = recortar(img, 1 - 0.8 * zoom / 100, 0.5 + mover_x / 100, 0.5 + mover_y / 100)
             vista = img.copy()
             vista.thumbnail((480, 480))                    # solo para mostrar: la predicción usa la foto completa
             c1, c2 = st.columns(2)
