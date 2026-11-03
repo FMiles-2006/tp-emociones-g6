@@ -39,6 +39,7 @@ actor y emoción de fotos nuevas. Sin pesos preentrenados.
 | **E16** | **v3 final**: búsqueda afinada (10 intentos) → base 48, dropout 0,4, L2 0, lr 1,4e-3, rot 0,04 / zoom 0,10 / color 0,1; **una red por tarea** | 0,414 / 0,361 | 0,393 / 0,349 | — | **Mejor CNN propia.** Dos salidas con los mismos HP: 0,355 / 0,284 y 0,362 / 0,302 |
 | **E17** | Misma configuración que E16 (una red por tarea) en el notebook final simplificado | 0,451 / 0,406 | 0,339 / 0,341 | — | Identidad mejor que E16; emoción peor y paró en la época 32: la CNN de emoción es inestable |
 | E18 | Variante de un compañero: dos salidas con cabeza propia, `loss_weights` emoción ×3, pesos por clase por salida, parada por F1 macro (paciencia 30) + ReduceLROnPlateau, modelo final con train + val | 0,546 / 0,400 | 0,360 / 0,308 | — | **No comparable**: partición de 129 videos (4 actores sin val/test, 16 evaluados) y técnicas a confirmar con la cátedra |
+| **E19** | Misma CNN final (una red por tarea, HP de E16), con la **partición corregida** (D-022: 154 → 137 videos, sin fugas por contenido) | 0,391 / 0,368 | 0,391 / 0,351 | — | Resultado honesto vigente. Test: 0,311 / 0,269 y 0,333 / 0,303 |
 
 ## Detalle
 
@@ -217,3 +218,15 @@ Notebook `cnn-v2` (95b7d55), huella `512b8d7c66ec`, misma partición.
 E14 a E18 usan la partición con fuga parcial: Momo (15 fotos de val/test del mismo clip que train) y Oscar
 Martínez (5 fotos de cortes seguidos de la misma escena). Afecta sobre todo a esos dos actores en identidad.
 La corrida con la partición corregida queda como E19.
+
+### E19 · Partición corregida (D-022), notebook final, 2026-11-03
+- Unificación: 154 → 137 videos (Lali 25 → 17, Oscar Martínez 12 → 7, Momo 5 → 3, Francella 18 → 17,
+  Barassi 4 → 3). Partición: train 1.847 (59 videos), val 435 (40), test 441 (47); R4 en 9 actores.
+  Control 3.3: 0 fotos de val/test del mismo actor con similitud > 0,80 frente a train (máximo 0,795).
+- Baselines (val): RF 0,260 / 0,222 y 0,322 / 0,225 (antes 0,334 / 0,277 y 0,255 / 0,167): el RF de
+  identidad también se beneficiaba de la fuga.
+- CNN propia (val): identidad 0,391 / 0,368, emoción 0,391 / 0,351 (72 y 62 épocas). Test: 0,311 / 0,269 y
+  0,333 / 0,303. Permutación: 0,391 → 0,241 (MLP 0,218 → 0,221).
+- ResNet50 conv4+conv5 (val): 0,664 / 0,543 y 0,524 / 0,496. Test: 0,658 / 0,528 y 0,399 / 0,382.
+- Lectura: identidad de la CNN baja ~6 puntos (los actores inflados por la fuga), pero la ventaja sobre el RF
+  crece (+13 puntos en val). Emoción mejora y queda arriba del trivial y del RF también en test.
