@@ -212,3 +212,8 @@ Notebook `cnn-v2` (95b7d55), huella `512b8d7c66ec`, misma partición.
   actores difíciles menos; la mejora real está en **emoción** (0,280 de F1 en test, más estable).
   Ideas a llevar a nuestro pipeline para la entrega final: pesos por clase por salida, parada por F1 con más
   paciencia y reentrenar con train + val. `ReduceLROnPlateau` y `loss_weights` hay que confirmarlos con la cátedra.
+
+### Nota 2026-11-03 · Fuga detectada en la partición (D-022)
+E14 a E18 usan la partición con fuga parcial: Momo (15 fotos de val/test del mismo clip que train) y Oscar
+Martínez (5 fotos de cortes seguidos de la misma escena). Afecta sobre todo a esos dos actores en identidad.
+La corrida con la partición corregida queda como E19.

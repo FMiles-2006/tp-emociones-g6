@@ -323,6 +323,23 @@ en la computadora de quien lo descarga.
 ~270 MB cada una); escribir el zip en Drive (el Drive se monta en solo lectura).
 **Quién:** Francisco Miles (con Claude).
 
+## D-022 · Unificar partes y videos casi idénticos antes de partir — 2026-11-03
+**Qué:** antes de la partición (celda 3.1 del notebook final) se unifican (1) las partes `_p2`, `_p3`… de un
+mismo video y (2) dentro de cada actor, los videos con alguna pareja de fotos con correlación de píxeles
+(gris 64×64) mayor a `UMBRAL_MISMO_VIDEO = 0,82`, en cadena. El control de fugas (3.3) ahora frena el
+notebook si queda alguna foto de val/test del mismo actor por encima de ese umbral frente a train.
+Modifica D-021 y la partición de D-002/D-007: **cambian train/val/test y todos los resultados** (E19).
+**Por qué:** la primera corrida del control de fugas (3.2 de D-021) mostró fugas reales que el chequeo por
+nombre no veía: Momo `video_1_p3` (val/test) contra `video_1` y `video_1_p2` (train), 15 fotos, similitud
+0,89 — la planilla de G7 anota las partes de un clip como videos distintos —; y Oscar Martínez, cortes
+`Oscar_Martinez11`/`13` y `6`/`8` de la misma escena según la planilla de G6, 5 fotos, 0,83–0,88. El recall
+1,00 de Momo en los dos modelos era consistente con esa fuga. Los pares de Lali con similitud 0,80–0,86 son
+videos distintos (otro peinado y color de pelo): con 0,82 algunos se unifican igual, lo que es conservador.
+**Alternativas descartadas:** corregir solo Momo y Oscar a mano (no generaliza); umbral 0,80 (une más pares
+de videos distintos de Lali sin ganar nada); no corregir y declararlo como limitación (los números de esos
+actores quedaban inflados).
+**Quién:** Francisco Miles (con Claude).
+
 ## Pendientes
 - Avisar al responsable del Drive sobre Pachu Peña (ñ) y Rodrigo de la Serna.
 - (Opcional) Repetir con 3 semillas para reportar media ± desvío.
