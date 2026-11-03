@@ -307,6 +307,22 @@ promediar varias semillas al elegir en validación) y volver a agregar la predic
 (el código queda en el historial del repo, commit c41cfb2).
 **Quién:** Francisco Miles (con Claude).
 
+## D-021 · Control de fugas, predicción con frases y redes guardadas — 2026-11-03
+**Qué:** en el notebook final (1) se agrega la celda 3.2, control de fugas por nombre de video
+(train ∩ val y train ∩ test deben dar 0; val ∩ test muestra los 9 videos R4) y por contenido (para cada foto
+de val/test, la foto de train más parecida en gris 64×64; se listan y muestran los pares más parecidos);
+(2) la sección 12 vuelve a predecir sobre fotos subidas, con frases del tipo «con un 67 % de confianza es
+Francella, con un 30 % es Darín y con un 3 % es Colapinto», para la CNN propia y para ResNet50, en actor y
+emoción; (3) 12.1 guarda las cuatro redes (arquitectura JSON + pesos, sin optimizador) en `modelos_g6.zip`
+y lo descarga; 12.2 las carga en otra sesión sin reentrenar (solo hace falta la celda 1.1).
+`PreprocesoResNet50` pasa a la celda 1.1 para que la ResNet50 se pueda cargar sin la sección 8. Modifica D-020.
+**Por qué:** pedido del grupo para la presentación: mostrar que no hay fugas, probar fotos nuevas y no
+esperar 55 min de entrenamiento cada vez. Los modelos no se versionan (CLAUDE.md, regla 7): el zip queda
+en la computadora de quien lo descarga.
+**Alternativas descartadas:** guardar con `model.save` (incluye el estado de Adam: la ResNet50 pesaría
+~270 MB cada una); escribir el zip en Drive (el Drive se monta en solo lectura).
+**Quién:** Francisco Miles (con Claude).
+
 ## Pendientes
 - Avisar al responsable del Drive sobre Pachu Peña (ñ) y Rodrigo de la Serna.
 - (Opcional) Repetir con 3 semillas para reportar media ± desvío.
