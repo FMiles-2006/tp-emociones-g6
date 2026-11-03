@@ -353,6 +353,25 @@ esos videos y no generalizan a fotos de otras fuentes.
 fuerte, varias semillas (quedan como trabajo futuro).
 **Quién:** Francisco Miles (con Claude).
 
+## D-024 · Aplicación: modelo en ONNX, Streamlit para el equipo y Lovable para el cliente — 2026-11-03
+**Qué:** las cuatro redes de E19 se exportan a ONNX (celda 12.5, verificadas contra Keras) y se publican en
+un repositorio público de modelos de Hugging Face. Dos apps las usan: una de **Streamlit** (Community
+Cloud, desde este repo) para el equipo, con predicción y resultados del proyecto; y un **frontend en
+Lovable** para el cliente, que sube una foto, recorta la cara a mano y recibe actor y emoción de cada red
+(la CNN como resultado principal, ResNet50 como referencia). En Lovable el modelo corre en el navegador
+con `onnxruntime-web`. Los modelos no se versionan en GitHub (regla 7); el dataset no se publica.
+**Por qué:** el foco final de la materia es separar el modelo de los datos y mostrarle al cliente solo la
+respuesta ante una imagen. Desde mediados de 2026 Hugging Face cobra los Spaces de Gradio y Docker, y los
+servidores gratuitos alternativos (Render, Koyeb) dan 512 MB, poco para dos ResNet50. Con ONNX en el
+navegador no hace falta servidor pago, no hay espera de arranque y Colab, Streamlit y Lovable dan las
+mismas probabilidades. Lovable se elige sobre Base44 porque su plan gratuito sincroniza con GitHub en los
+dos sentidos (los ajustes se hacen en el repo sin gastar créditos); Base44 da 25 créditos al mes y GitHub
+solo en planes pagos. Publicar los pesos no publica las fotos; el grupo acepta que sean públicos.
+**Alternativas descartadas:** API en un Space de Gradio/Docker (pago); Space ZeroGPU (cuenta de más de
+30 días y pensado para PyTorch); API en Render o Koyeb (512 MB); TensorFlow.js (conversión frágil con
+Keras 3); Base44.
+**Quién:** Francisco Miles (con Claude).
+
 ## Pendientes
 - Avisar al responsable del Drive sobre Pachu Peña (ñ) y Rodrigo de la Serna.
 - (Opcional) Repetir con 3 semillas para reportar media ± desvío.
