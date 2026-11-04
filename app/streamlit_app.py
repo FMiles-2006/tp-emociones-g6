@@ -19,7 +19,6 @@ import resultados as R
 from inferencia import PANELES, abrir_imagen, cargar_redes, frase, predecir, recortar
 
 st.set_page_config(page_title="Quién es y qué siente · Grupo 6", page_icon="🎭", layout="wide")
-_precarga()
 if "id_foto" not in st.session_state:
     st.session_state.id_foto = 0
 
@@ -95,6 +94,7 @@ def tabla_md(filas):
     return "\n".join(lineas)
 
 
+_precarga()   # arranca la descarga de las redes en segundo plano (definida arriba)
 st.title("Quién es y qué siente")
 st.caption("TP IAyAA II · UCA Rosario 2026 · Grupo 6 — CNN propia entrenada desde cero y ResNet50 con "
            "transfer learning, sobre 20 actores argentinos y 5 emociones.")
