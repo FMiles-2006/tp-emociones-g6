@@ -21,7 +21,7 @@ from PIL import Image, ImageOps
 
 REPO_MODELOS = "Franmiles/tp-g6-modelos"
 
-# Orden en que se muestran los resultados: la CNN propia compite; ResNet50 es la referencia.
+# Orden en que se muestran los resultados: primero la CNN propia, después ResNet50 (transfer learning).
 PANELES = [("cnn", "actor"), ("cnn", "emocion"), ("resnet", "actor"), ("resnet", "emocion")]
 
 
@@ -37,6 +37,14 @@ class Red:
     sesion: ort.InferenceSession
 
 
+def _opciones() -> ort.SessionOptions:
+    """Opciones para el servidor gratuito (2 núcleos compartidos): optimización completa del grafo y 2 hilos."""
+    o = ort.SessionOptions()
+    o.graph_optimization_level = ort.GraphOptimizationLevel.ORT_ENABLE_ALL
+    o.intra_op_num_threads = 2
+    return o
+
+
 @lru_cache(maxsize=1)
 def cargar_redes() -> dict[str, Red]:
     """Descarga (una sola vez, queda en caché) y abre las cuatro redes ONNX."""
@@ -46,7 +54,7 @@ def cargar_redes() -> dict[str, Red]:
         ruta = hf_hub_download(REPO_MODELOS, info["archivo"])
         redes[clave] = Red(clave=clave, nombre=info["nombre"], tarea=info["tarea"], compite=info["compite"],
                            lado=info["lado"], entrada=info["entrada"], etiquetas=info["etiquetas"],
-                           sesion=ort.InferenceSession(ruta, providers=["CPUExecutionProvider"]))
+                           sesion=ort.InferenceSession(ruta, sess_options=_opciones(), providers=["CPUExecutionProvider"]))
     return redes
 
 

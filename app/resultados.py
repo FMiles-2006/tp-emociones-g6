@@ -9,13 +9,13 @@ VALIDACION = [
     ("Trivial (clase más frecuente)", (0.145, 0.013), (0.241, 0.078)),
     ("Random Forest (píxeles 64×64)", (0.260, 0.222), (0.322, 0.225)),
     ("MLP scikit-learn (píxeles 64×64)", (0.218, 0.187), (0.274, 0.171)),
-    ("CNN propia · E19 (compite)", (0.391, 0.368), (0.391, 0.351)),
+    ("CNN propia · E19 (desde cero)", (0.391, 0.368), (0.391, 0.351)),
     ("ResNet50 fase 1 (base congelada)", (0.522, 0.452), (0.441, 0.407)),
     ("ResNet50 fase 2 (conv4 + conv5)", (0.664, 0.543), (0.524, 0.496)),
 ]
 
 TEST = [
-    ("CNN propia · E19 (compite)", (0.311, 0.269), (0.333, 0.303)),
+    ("CNN propia · E19 (desde cero)", (0.311, 0.269), (0.333, 0.303)),
     ("ResNet50 fase 2 (conv4 + conv5)", (0.658, 0.528), (0.399, 0.382)),
 ]
 

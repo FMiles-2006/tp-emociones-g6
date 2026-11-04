@@ -10,12 +10,18 @@ Todo se dibuja con st.markdown (HTML y tablas markdown) en lugar de st.metric, s
 st.bar_chart: esos componentes se cargan aparte en el navegador y en Community Cloud fallaban con
 "Failed to fetch dynamically imported module". Así la página depende de una sola pieza y carga más rápido.
 """
+import io
+import threading
+
 import streamlit as st
 
 import resultados as R
 from inferencia import PANELES, abrir_imagen, cargar_redes, frase, predecir, recortar
 
 st.set_page_config(page_title="Quién es y qué siente · Grupo 6", page_icon="🎭", layout="wide")
+_precarga()
+if "id_foto" not in st.session_state:
+    st.session_state.id_foto = 0
 
 COLOR = {"cnn": "#2E86AB", "resnet": "#E07A2E"}
 st.markdown("""
@@ -33,9 +39,43 @@ st.markdown("""
 </style>""", unsafe_allow_html=True)
 
 
-@st.cache_resource(show_spinner="Descargando las redes (solo la primera vez, unos 210 MB)…")
+@st.cache_resource(show_spinner=False)
+def _precarga():
+    """Empieza a bajar y abrir las redes apenas se abre la página, en segundo plano.
+
+    Así, mientras la persona elige la foto, las redes ya se están descargando (la primera vez, ~210 MB)
+    y la primera predicción no espera desde cero.
+    """
+    hilo = threading.Thread(target=cargar_redes, daemon=True)
+    hilo.start()
+    return hilo
+
+
 def redes():
+    hilo = _precarga()
+    if hilo.is_alive():
+        with st.spinner("Terminando de descargar las redes (solo la primera vez, unos 210 MB)…"):
+            hilo.join()
     return cargar_redes()
+
+
+@st.cache_data(max_entries=8, show_spinner=False)
+def foto(datos: bytes):
+    """Abre la foto una sola vez por archivo (orientación corregida) y arma una miniatura para mostrar."""
+    img = abrir_imagen(io.BytesIO(datos))
+    vista = img.copy()
+    vista.thumbnail((480, 480))
+    return img, vista
+
+
+@st.cache_data(max_entries=64, show_spinner=False)
+def predecir_todo(datos: bytes, zoom: int, mover_x: int, mover_y: int):
+    """Predicciones de las 4 redes para una foto y un recorte. Queda en caché: volver a un recorte ya
+    probado (o mover otro control y regresar) responde al instante, sin volver a correr las redes."""
+    img, _ = foto(datos)
+    recorte = recortar(img, 1 - 0.8 * zoom / 100, 0.5 + mover_x / 100, 0.5 + mover_y / 100)
+    todas = redes()
+    return {(f, t): predecir(recorte, todas[f"{f}_{t}"]) for f, t in PANELES}
 
 
 def barras(pred, color):
@@ -56,37 +96,45 @@ def tabla_md(filas):
 
 
 st.title("Quién es y qué siente")
-st.caption("TP IAyAA II · UCA Rosario 2026 · Grupo 6 — CNN propia entrenada desde cero (compite) "
-           "y ResNet50 preentrenada (referencia), sobre 20 actores argentinos y 5 emociones.")
+st.caption("TP IAyAA II · UCA Rosario 2026 · Grupo 6 — CNN propia entrenada desde cero y ResNet50 con "
+           "transfer learning, sobre 20 actores argentinos y 5 emociones.")
 
 tab_pred, tab_res, tab_como = st.tabs(["📷 Predecir", "📊 Resultados del proyecto", "⚙️ Cómo funciona"])
 
 # ----------------------------------------------------------------------------- Predecir
-with tab_pred:
+def otra_foto():
+    """Cambiar la clave del cargador lo vacía: es la forma confiable de sacar la foto y subir otra."""
+    st.session_state.id_foto += 1
+
+
+@st.fragment
+def seccion_predecir():
+    """Sección aparte (fragment): mover un control vuelve a dibujar solo esta parte, no toda la página."""
     col_foto, col_resp = st.columns([1, 1.4], gap="large")
     with col_foto:
         origen = st.radio("Foto", ["Subir archivo", "Sacar con la cámara"], horizontal=True,
-                          label_visibility="collapsed")
-        archivo = (st.file_uploader("Subí una foto de uno de los 20 actores", type=["jpg", "jpeg", "png", "webp"])
-                   if origen == "Subir archivo" else st.camera_input("Sacá una foto"))
+                          label_visibility="collapsed", on_change=otra_foto)
+        clave = f"foto_{st.session_state.id_foto}"
+        archivo = (st.file_uploader("Subí una foto de uno de los 20 actores", type=["jpg", "jpeg", "png", "webp"], key=clave)
+                   if origen == "Subir archivo" else st.camera_input("Sacá una foto", key=clave))
         if archivo:
-            img = abrir_imagen(archivo)
+            datos = archivo.getvalue()
+            st.button("🔄 Probar otra foto", on_click=otra_foto, use_container_width=True)
+            img, vista = foto(datos)
             st.markdown("**Recortá la cara.** Las redes se entrenaron con recortes de rostro: "
                         "cuanto más ocupe la cara, mejor.")
             # Controles en palabras: zoom de 0 % (foto entera) a 100 % (máximo acercamiento)
             # y desplazamiento del recorte hacia la izquierda/derecha y arriba/abajo, partiendo del centro.
-            zoom = st.slider("🔍 Zoom", 0, 100, 0, 5, format="%d %%",
+            zoom = st.slider("🔍 Zoom", 0, 100, 0, 5, format="%d %%", key=f"zoom_{clave}",
                              help="0 %: el cuadrado más grande de la foto. 100 %: lo más cerca posible.")
             lado_h = lambda v: "centro" if v == 0 else (f"{abs(v)} % más a la izquierda" if v < 0
                                                          else f"{v} % más a la derecha")
             lado_v = lambda v: "centro" if v == 0 else (f"{abs(v)} % más arriba" if v < 0 else f"{v} % más abajo")
             mover_x = st.select_slider("↔️ Izquierda · derecha", options=list(range(-50, 51, 2)), value=0,
-                                       format_func=lado_h)
+                                       format_func=lado_h, key=f"x_{clave}")
             mover_y = st.select_slider("↕️ Arriba · abajo", options=list(range(-50, 51, 2)), value=0,
-                                       format_func=lado_v)
+                                       format_func=lado_v, key=f"y_{clave}")
             recorte = recortar(img, 1 - 0.8 * zoom / 100, 0.5 + mover_x / 100, 0.5 + mover_y / 100)
-            vista = img.copy()
-            vista.thumbnail((480, 480))                    # solo para mostrar: la predicción usa la foto completa
             c1, c2 = st.columns(2)
             c1.image(vista, caption="Foto original")
             c2.image(recorte.resize((224, 224)), caption="Lo que ven las redes")
@@ -96,27 +144,31 @@ with tab_pred:
             st.info("Subí una foto (o sacala con la cámara) para ver qué responden las redes.")
             st.markdown("Las redes solo conocen a **20 actores** y **5 emociones** (alegría, enojo, neutral, "
                         "sorpresa, tristeza): con una persona que no está, igual eligen a alguien de la lista.")
-        else:
-            todas = redes()
-            preds = {(f, t): predecir(recorte, todas[f"{f}_{t}"]) for f, t in PANELES}
-            for familia, titulo in (("cnn", "CNN propia · compite"), ("resnet", "ResNet50 · referencia")):
-                st.subheader(titulo)
-                ca, ce = st.columns(2)
-                for col, tarea, rotulo in ((ca, "actor", "Actor"), (ce, "emocion", "Emoción")):
-                    p = preds[(familia, tarea)]
-                    texto = frase(p, tarea)
-                    col.markdown(f'<div class="top">{rotulo}: {p[0][0]} <small>{100 * p[0][1]:.0f} %</small></div>'
-                                 + barras(p, COLOR[familia]), unsafe_allow_html=True)
-                    col.caption(texto[0].upper() + texto[1:])
-            st.caption("El porcentaje es lo que la red cree (salida softmax), no una garantía: "
-                       "con fotos de otras fuentes las redes se equivocan mucho, a veces con mucha confianza.")
+            return
+        with st.spinner("Prediciendo…"):
+            preds = predecir_todo(datos, zoom, mover_x, mover_y)
+        for familia, titulo in (("cnn", "CNN propia · entrenada desde cero"), ("resnet", "ResNet50 · transfer learning")):
+            st.subheader(titulo)
+            ca, ce = st.columns(2)
+            for col, tarea, rotulo in ((ca, "actor", "Actor"), (ce, "emocion", "Emoción")):
+                p = preds[(familia, tarea)]
+                texto = frase(p, tarea)
+                col.markdown(f'<div class="top">{rotulo}: {p[0][0]} <small>{100 * p[0][1]:.0f} %</small></div>'
+                             + barras(p, COLOR[familia]), unsafe_allow_html=True)
+                col.caption(texto[0].upper() + texto[1:])
+        st.caption("El porcentaje es lo que la red cree (salida softmax), no una garantía: "
+                   "con fotos de otras fuentes las redes se equivocan mucho, a veces con mucha confianza.")
+
+
+with tab_pred:
+    seccion_predecir()
 
 # ----------------------------------------------------------------------------- Resultados
 with tab_res:
     kpis = [("2.723", "recortes de rostro · 20 actores · 5 emociones"),
             ("154 → 137", "videos de origen → después de unificar"),
             ("0,311", "CNN propia · identidad en test (6 veces el azar)"),
-            ("0,658", "ResNet50 · identidad en test (referencia)")]
+            ("0,658", "ResNet50 · identidad en test (transfer learning)")]
     for col, (v, t) in zip(st.columns(4), kpis):
         col.markdown(f'<div class="kpi"><b>{v}</b><span>{t}</span></div>', unsafe_allow_html=True)
 
