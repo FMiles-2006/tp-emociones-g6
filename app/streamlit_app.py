@@ -16,7 +16,9 @@ import threading
 import streamlit as st
 
 import resultados as R
-from inferencia import PANELES, abrir_imagen, cargar_redes, frase, predecir, recortar
+from PIL import ImageDraw
+
+from inferencia import PANELES, abrir_imagen, caja_recorte, cargar_redes, frase, predecir, recortar
 
 st.set_page_config(page_title="Quién es y qué siente · Grupo 6", page_icon="🎭", layout="wide")
 if "id_foto" not in st.session_state:
@@ -107,6 +109,12 @@ def otra_foto():
     st.session_state.id_foto += 1
 
 
+def centrar(clave):
+    """Vuelve el zoom y el desplazamiento a cero (el recorte central, el mismo que usa el notebook)."""
+    for k in (f"zoom_{clave}", f"x_{clave}", f"y_{clave}"):
+        st.session_state[k] = 0
+
+
 @st.fragment
 def seccion_predecir():
     """Sección aparte (fragment): mover un control vuelve a dibujar solo esta parte, no toda la página."""
@@ -123,8 +131,9 @@ def seccion_predecir():
             img, vista = foto(datos)
             st.markdown("**Recortá la cara.** Las redes se entrenaron con recortes de rostro: "
                         "cuanto más ocupe la cara, mejor.")
-            # Controles en palabras: zoom de 0 % (foto entera) a 100 % (máximo acercamiento)
-            # y desplazamiento del recorte hacia la izquierda/derecha y arriba/abajo, partiendo del centro.
+            # Controles en palabras: zoom de 0 % (foto entera) a 100 % (máximo acercamiento) y desplazamiento
+            # del recorte partiendo del centro. En la barra vertical, «más arriba» queda a la derecha y «más
+            # abajo» a la izquierda (como subir un volumen): por eso sus opciones van de +50 a −50.
             zoom = st.slider("🔍 Zoom", 0, 100, 0, 5, format="%d %%", key=f"zoom_{clave}",
                              help="0 %: el cuadrado más grande de la foto. 100 %: lo más cerca posible.")
             lado_h = lambda v: "centro" if v == 0 else (f"{abs(v)} % más a la izquierda" if v < 0
@@ -132,11 +141,18 @@ def seccion_predecir():
             lado_v = lambda v: "centro" if v == 0 else (f"{abs(v)} % más arriba" if v < 0 else f"{v} % más abajo")
             mover_x = st.select_slider("↔️ Izquierda · derecha", options=list(range(-50, 51, 2)), value=0,
                                        format_func=lado_h, key=f"x_{clave}")
-            mover_y = st.select_slider("↕️ Arriba · abajo", options=list(range(-50, 51, 2)), value=0,
+            mover_y = st.select_slider("↕️ Abajo · arriba", options=list(range(50, -51, -2)), value=0,
                                        format_func=lado_v, key=f"y_{clave}")
-            recorte = recortar(img, 1 - 0.8 * zoom / 100, 0.5 + mover_x / 100, 0.5 + mover_y / 100)
+            st.button("↺ Volver al recorte inicial", on_click=centrar, args=(clave,), use_container_width=True)
+            tamano, cx, cy = 1 - 0.8 * zoom / 100, 0.5 + mover_x / 100, 0.5 + mover_y / 100
+            recorte = recortar(img, tamano, cx, cy)
+            # Recuadro sobre la foto: muestra qué parte ven las redes (mismas cuentas que el recorte).
+            con_caja = vista.copy()
+            esc = vista.width / img.width
+            x0, y0, x1, y1 = (round(v * esc) for v in caja_recorte(*img.size, tamano, cx, cy))
+            ImageDraw.Draw(con_caja).rectangle((x0, y0, x1 - 1, y1 - 1), outline="#FF4B4B", width=3)
             c1, c2 = st.columns(2)
-            c1.image(vista, caption="Foto original")
+            c1.image(con_caja, caption="Foto original (en rojo, el recorte)")
             c2.image(recorte.resize((224, 224)), caption="Lo que ven las redes")
 
     with col_resp:

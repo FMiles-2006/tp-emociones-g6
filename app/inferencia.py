@@ -63,18 +63,26 @@ def abrir_imagen(archivo) -> Image.Image:
     return ImageOps.exif_transpose(Image.open(archivo)).convert("RGB")
 
 
+def caja_recorte(ancho: int, alto: int, tamano: float = 1.0, centro_x: float = 0.5,
+                 centro_y: float = 0.5) -> tuple[int, int, int, int]:
+    """El cuadrado a recortar, (izq, arriba, der, abajo), sin salirse de la foto.
+
+    `tamano` es el lado como fracción del lado corto de la foto; el centro va de 0 a 1. Lo usan el
+    recorte y el recuadro que la app dibuja sobre la foto, así los dos coinciden siempre.
+    """
+    lado = max(1, round(min(ancho, alto) * tamano))
+    izq = min(max(round(centro_x * ancho - lado / 2), 0), ancho - lado)
+    arr = min(max(round(centro_y * alto - lado / 2), 0), alto - lado)
+    return izq, arr, izq + lado, arr + lado
+
+
 def recortar(img: Image.Image, tamano: float = 1.0, centro_x: float = 0.5, centro_y: float = 0.5) -> Image.Image:
     """Recorta un cuadrado alrededor de la cara.
 
     Por defecto (tamano=1, centro 0,5) es el cuadrado central más grande, igual que en el notebook.
     Las redes se entrenaron con recortes de rostro: cuanto más ocupe la cara, mejor.
-    `tamano` es el lado del cuadrado como fracción del lado corto de la foto; el centro va de 0 a 1.
     """
-    w, h = img.size
-    lado = max(1, round(min(w, h) * tamano))
-    izq = min(max(round(centro_x * w - lado / 2), 0), w - lado)
-    arr = min(max(round(centro_y * h - lado / 2), 0), h - lado)
-    return img.crop((izq, arr, izq + lado, arr + lado))
+    return img.crop(caja_recorte(*img.size, tamano, centro_x, centro_y))
 
 
 def preparar(recorte: Image.Image, lado: int) -> np.ndarray:
